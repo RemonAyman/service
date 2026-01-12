@@ -81,6 +81,8 @@ public function store(Request $request)
             'name'  => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
+            'phone' => 'nullable|string',
+            'address' => 'nullable|string',
             
         ]);
         
@@ -98,7 +100,7 @@ public function store(Request $request)
             "id"       => $request->id,
             "name"     => $request->name,
             "email"    => $request->email,
-            "password" => $request->password, 
+            "password" => Hash::make($request->password), 
             "role"     => $request->role,
             "phone"    => $request->phone,
             "address"  => $request->address,
@@ -112,48 +114,85 @@ public function store(Request $request)
     
         ];
         return response()->json($data);
-    }public function update(Request $request)
-{
-    $user = User::find($request->old_id);
+    }    public function update(Request $request)
+    {
+        $user = User::find($request->old_id);
 
-    if (!$user) {
+        if (!$user) {
+            return response()->json([
+                'msg' => 'User not found',
+                'status' => 404
+            ], 404);
+        }
+
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'role' => 'required|in:user,admin',
+            'phone' => 'nullable',
+            'address' => 'nullable',
+            'password' => 'nullable|min:6',
+        ]);
+
+        $data = [
+            'name'    => $request->name,
+            'email'   => $request->email,
+            'role'    => $request->role,
+            'phone'   => $request->phone,
+            'address' => $request->address,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $user->update($data);
+
         return response()->json([
-            'msg' => 'User not found',
-            'status' => 404
-        ], 404);
+            'msg' => 'User updated successfully',
+            'status' => 200,
+            'user' => $user
+        ]);
     }
 
-    $request->validate([
-        'name'  => 'required|string|max:255',
-        'email' => [
-            'required',
-            'email',
-            Rule::unique('users', 'email')->ignore($user->id),
-        ],
-        'role' => 'required|in:user,admin',
-        'phone' => 'nullable',
-        'address' => 'nullable',
-        'password' => 'nullable|min:6',
-    ]);
+    public function updateProfile(Request $request)
+    {
+        /** @var \App\Models\User $user */
+        $user = auth()->user();
 
-    $data = [
-        'name'    => $request->name,
-        'email'   => $request->email,
-        'role'    => $request->role,
-        'phone'   => $request->phone,
-        'address' => $request->address,
-    ];
+        $request->validate([
+            'name'  => 'required|string|max:255',
+            'email' => [
+                'required',
+                'email',
+                Rule::unique('users', 'email')->ignore($user->id),
+            ],
+            'phone' => 'nullable|string',
+            'address' => 'nullable|string',
+            'password' => 'nullable|min:6|confirmed',
+        ]);
 
-    if ($request->filled('password')) {
-        $data['password'] = Hash::make($request->password);
+        $data = [
+            'name'    => $request->name,
+            'email'   => $request->email,
+            'phone'   => $request->phone,
+            'address' => $request->address,
+        ];
+
+        if ($request->filled('password')) {
+            $data['password'] = Hash::make($request->password);
+        }
+
+        $user->update($data);
+
+        return response()->json([
+            'msg' => 'تم تحديث البيانات بنجاح',
+            'status' => 200,
+            'user' => $user
+        ]);
     }
-
-    $user->update($data);
-
-    return response()->json([
-        'msg' => 'User updated successfully',
-        'status' => 200,
-        'user' => $user
-    ]);
-}
 }
