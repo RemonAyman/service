@@ -18,6 +18,7 @@ return new class extends Migration
     $table->text('description')->nullable();
     $table->decimal('price', 8, 2);
     $table->string('estimated_time');
+    $table->string('image')->nullable();
     $table->timestamps();
 });
     }

@@ -13,6 +13,10 @@ class Technician extends Model
         'user_id',
         'category_id',
         'experience_years',
+        'hourly_rate',
+        'availability',
+        'city',
+        'bio',
         'rating',
         'is_available',
     ];

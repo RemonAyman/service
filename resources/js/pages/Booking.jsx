@@ -7,33 +7,54 @@ import axios from 'axios';
 const Booking = () => {
     const [searchParams] = useSearchParams();
     const serviceId = searchParams.get('service_id');
+    const techId = searchParams.get('tech_id');
     const navigate = useNavigate();
     const { user } = useAuth();
     
     const [service, setService] = useState(null);
+    const [technician, setTechnician] = useState(null);
+    const [services, setServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState('');
 
-    const [formData, setFormData] = useState({
-        requested_date: '',
-        requested_time: '',
-        notes: ''
-    });
-
     useEffect(() => {
         if (serviceId) {
             fetchService();
+        } else if (techId) {
+            fetchTechnician();
         }
-    }, [serviceId]);
+    }, [serviceId, techId]);
 
     const fetchService = async () => {
         try {
-            const response = await axios.get(`/serviceone/${serviceId}`);
+            const response = await axios.get(`/api/serviceone/${serviceId}`, { baseURL: '/' });
             setService(response.data.service);
         } catch (err) {
             console.error('Error fetching service:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const fetchTechnician = async () => {
+        try {
+            const response = await axios.get(`/api/techone/${techId}`, { baseURL: '/' });
+            if (response.data.status === 200) {
+                const tech = response.data.technician;
+                setTechnician(tech);
+                
+                // Fetch services for this category
+                const servicesRes = await axios.get(`/api/services`, { baseURL: '/' });
+                const catServices = servicesRes.data.services.data.filter(s => s.category_id === tech.category_id);
+                setServices(catServices);
+                if (catServices.length > 0) {
+                    setService(catServices[0]); // Default to first service
+                }
+            }
+        } catch (err) {
+            console.error('Error fetching technician:', err);
         } finally {
             setLoading(false);
         }
@@ -52,10 +73,11 @@ const Booking = () => {
         try {
             await axios.post('/servicerequeststore', {
                 ...formData,
-                service_id: serviceId,
+                service_id: serviceId || service?.id,
+                technician_id: techId || technician?.id,
                 user_id: user.id,
                 status: 'pending'
-            });
+            }, { baseURL: '/' });
             setSuccess(true);
             setTimeout(() => navigate('/dashboard'), 3000);
         } catch (err) {
@@ -93,16 +115,23 @@ const Booking = () => {
                 <div className="md:col-span-1 space-y-6">
                     <div className="bg-white p-6 rounded-3xl shadow-sm border border-gray-100 sticky top-24">
                         <img 
-                            src={service?.image || "https://images.unsplash.com/photo-1621905252507-b354bcadc911?q=80&w=2070&auto=format&fit=crop"} 
+                            src={service?.image || technician?.user?.avatar || "https://images.unsplash.com/photo-1621905252507-b354bcadc911?q=80&w=2070&auto=format&fit=crop"} 
                             alt={service?.name} 
                             className="w-full h-40 object-cover rounded-2xl mb-4"
                         />
-                        <h2 className="text-xl font-bold text-gray-900 mb-2">{service?.name}</h2>
-                        <div className="text-2xl font-extrabold text-blue-600 mb-4">{service?.price} ج.م</div>
+                        {technician && (
+                            <div className="mb-4 pb-4 border-b border-gray-50 text-right">
+                                <div className="text-sm font-bold text-blue-600 uppercase mb-1">الفني المختار</div>
+                                <div className="font-extrabold text-gray-900 text-lg uppercase">{technician.user?.name}</div>
+                                <div className="text-gray-400 text-xs font-bold uppercase">{technician.category?.name}</div>
+                            </div>
+                        )}
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">{service?.name || 'اختر الخدمة'}</h2>
+                        <div className="text-2xl font-extrabold text-blue-600 mb-4">{service?.price || technician?.hourly_rate || 0} ج.م</div>
                         <div className="space-y-3 pt-4 border-t border-gray-50">
                             <div className="flex items-center text-sm text-gray-500 font-medium">
                                 <Clock className="h-4 w-4 ml-2 text-blue-500" />
-                                <span>مدة الخدمة: {service?.estimated_time}</span>
+                                <span>{service ? `مدة الخدمة: ${service.estimated_time}` : `سعر الساعة: ${technician?.hourly_rate} ج.م`}</span>
                             </div>
                         </div>
                     </div>

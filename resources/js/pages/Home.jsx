@@ -16,25 +16,59 @@ const Home = () => {
     const [featuredServices, setFeaturedServices] = useState([]);
     const [loading, setLoading] = useState(true);
     const [searchQuery, setSearchQuery] = useState('');
+    const [categories, setCategories] = useState([]);
 
     useEffect(() => {
         setLoading(true);
+        // Fetch Services
         axios.get('/services')
             .then(res => {
                 setFeaturedServices(res.data.services.data.slice(0, 4));
             })
-            .catch(err => console.error('Error fetching services:', err))
+            .catch(err => console.error('Error fetching services:', err));
+
+        // Fetch Categories
+        axios.get('/api/cats', { baseURL: '/' })
+            .then(res => {
+                if (res.data.status === 200) {
+                    setCategories(res.data.categories);
+                }
+            })
+            .catch(err => console.error('Error fetching categories:', err))
             .finally(() => setLoading(false));
     }, []);
 
-    const categories = [
-        { name: 'تنظيف', icon: <Droplets />, color: 'bg-blue-50 text-blue-600' },
-        { name: 'كهرباء', icon: <Lightbulb />, color: 'bg-yellow-50 text-yellow-600' },
-        { name: 'سباكة', icon: <Hammer />, color: 'bg-orange-50 text-orange-600' },
-        { name: 'تكييف', icon: <AirVent />, color: 'bg-cyan-50 text-cyan-600' },
-        { name: 'نجارة', icon: <Hammer />, color: 'bg-amber-50 text-amber-600' },
-        { name: 'حدائق', icon: <Sprout />, color: 'bg-green-50 text-green-600' },
-    ];
+    const getCategoryIcon = (name) => {
+        switch (name) {
+            case 'تنظيف': return <Droplets />;
+            case 'كهرباء': return <Lightbulb />;
+            case 'سباكة': return <Hammer />;
+            case 'تكييف': return <AirVent />;
+            case 'نجارة': return <Hammer />;
+            case 'حدائق': return <Sprout />;
+            case 'ألوميتال': return <Smartphone />;
+            case 'نقاشة': return <Zap />;
+            case 'نقل عفش': return <Smartphone />;
+            case 'تصليح أجهزة': return <Smartphone />;
+            case 'غاز': return <Zap />;
+            case 'مياه': return <Droplets />;
+            default: return <Hammer />;
+        }
+    };
+
+    const getCategoryColor = (name) => {
+        switch (name) {
+            case 'تنظيف': return 'bg-blue-50 text-blue-600';
+            case 'كهرباء': return 'bg-yellow-50 text-yellow-600';
+            case 'سباكة': return 'bg-orange-50 text-orange-600';
+            case 'تكييف': return 'bg-cyan-50 text-cyan-600';
+            case 'نجارة': return 'bg-amber-50 text-amber-600';
+            case 'حدائق': return 'bg-green-50 text-green-600';
+            case 'غاز': return 'bg-red-50 text-red-600';
+            case 'مياه': return 'bg-sky-50 text-sky-600';
+            default: return 'bg-slate-50 text-slate-600';
+        }
+    };
 
     return (
         <div className="bg-slate-50 overflow-x-hidden" dir="rtl">
@@ -130,19 +164,21 @@ const Home = () => {
                         <div className="h-1.5 w-24 bg-blue-600 mx-auto rounded-full" />
                     </div>
                     
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                    <div className="flex flex-wrap justify-center gap-6">
                         {categories.map((cat, idx) => (
                             <motion.div 
                                 key={idx}
                                 whileHover={{ y: -10 }}
-                                className="group cursor-pointer"
+                                className="group cursor-pointer w-full sm:w-[calc(50%-1.5rem)] md:w-[calc(33.33%-1.5rem)] lg:w-[calc(20%-1.5rem)] min-w-[160px]"
                             >
-                                <div className={`aspect-square ${cat.color} rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-sm group-hover:shadow-2xl transition-all duration-300 border border-transparent group-hover:border-blue-100`}>
-                                    <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-sm text-gray-700">
-                                        {React.cloneElement(cat.icon, { size: 30 })}
+                                <Link to={`/category/${cat.id}/technicians`}>
+                                    <div className={`aspect-square ${getCategoryColor(cat.name)} rounded-[2rem] flex flex-col items-center justify-center space-y-4 shadow-sm group-hover:shadow-2xl transition-all duration-300 border border-transparent group-hover:border-blue-100`}>
+                                        <div className="w-14 h-14 rounded-2xl bg-white flex items-center justify-center shadow-sm text-gray-700">
+                                            {React.cloneElement(getCategoryIcon(cat.name), { size: 30 })}
+                                        </div>
+                                        <span className="font-bold text-lg">{cat.name}</span>
                                     </div>
-                                    <span className="font-bold text-lg">{cat.name}</span>
-                                </div>
+                                </Link>
                             </motion.div>
                         ))}
                     </div>

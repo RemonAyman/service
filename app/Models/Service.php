@@ -17,6 +17,7 @@ class Service extends Model
         'price',
         'estimated_time',
         'category_id',
+        'image',
     ];
      // علاقة مع Category
     public function category() {

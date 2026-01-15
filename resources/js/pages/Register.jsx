@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Lock, Phone, MapPin, Loader2, AlertCircle, ArrowRight, CheckCircle2 } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { User, Mail, Lock, Phone, MapPin, Loader2, AlertCircle, ArrowRight, CheckCircle2, Briefcase, Clock, Calendar, Quote } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
 
 const Register = () => {
     const [formData, setFormData] = useState({
@@ -13,15 +13,45 @@ const Register = () => {
         password_confirmation: '',
         phone: '',
         address: '',
+        role: 'user', // default role
+        category_id: '',
+        experience_years: '',
+        hourly_rate: '',
+        city: '',
+        bio: '',
+        availability: [],
     });
+    const [categories, setCategories] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
     
     const { login } = useAuth();
     const navigate = useNavigate();
 
+    useEffect(() => {
+        const fetchCategories = async () => {
+            try {
+                const response = await axios.get('/api/cats', { baseURL: '/' });
+                if (response.data.status === 200) {
+                    setCategories(response.data.categories);
+                }
+            } catch (err) {
+                console.error("فشل في تحميل الأقسام:", err);
+            }
+        };
+        fetchCategories();
+    }, []);
+
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+    };
+
+    const handleCheckboxChange = (day) => {
+        const updatedAvailability = formData.availability.includes(day)
+            ? formData.availability.filter(d => d !== day)
+            : [...formData.availability, day];
+        setFormData({ ...formData, availability: updatedAvailability });
     };
 
     const handleSubmit = async (e) => {
@@ -40,6 +70,16 @@ const Register = () => {
             setLoading(false);
         }
     };
+
+    const days = [
+        { label: 'السبت', value: 'Saturday' },
+        { label: 'الأحد', value: 'Sunday' },
+        { label: 'الاثنين', value: 'Monday' },
+        { label: 'الثلاثاء', value: 'Tuesday' },
+        { label: 'الأربعاء', value: 'Wednesday' },
+        { label: 'الخميس', value: 'Thursday' },
+        { label: 'الجمعة', value: 'Friday' },
+    ];
 
     const trustPoints = [
         "وصول فوري لأمهر الفنيين في مصر",
@@ -95,7 +135,7 @@ const Register = () => {
             </div>
 
             {/* Left Side - Form */}
-            <div className="w-full lg:w-7/12 flex items-center justify-center p-8 sm:p-12 lg:p-20 relative bg-slate-50/30">
+            <div className="w-full lg:w-7/12 flex items-center justify-center p-8 sm:p-12 lg:py-20 lg:px-12 relative bg-slate-50/30">
                 <Link to="/" className="absolute top-8 left-8 text-gray-400 hover:text-gray-900 flex items-center space-x-2 rtl:space-x-reverse font-bold group">
                     <span className="order-2">العودة للرئيسية</span>
                     <ArrowRight size={20} className="group-hover:translate-x-1 transition-transform order-1" />
@@ -106,9 +146,35 @@ const Register = () => {
                     animate={{ opacity: 1, y: 0 }}
                     className="max-w-2xl w-full"
                 >
-                    <div className="mb-12">
+                    <div className="mb-10 text-center sm:text-right">
                         <h1 className="text-4xl font-black text-gray-900 mb-4">إنشاء حساب جديد</h1>
                         <p className="text-gray-500 font-medium text-lg">يسعدنا انضمامك إلى مجتمعنا المتنامي</p>
+                    </div>
+
+                    {/* Role Selection */}
+                    <div className="flex bg-gray-100 p-1.5 rounded-[2rem] mb-10 w-full max-w-md mx-auto sm:mx-0">
+                        <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, role: 'user' })}
+                            className={`flex-1 py-3 px-6 rounded-[1.8rem] font-black text-sm transition-all ${
+                                formData.role === 'user' 
+                                    ? 'bg-white text-blue-600 shadow-sm' 
+                                    : 'text-gray-500 hover:text-gray-900'
+                            }`}
+                        >
+                            أنا عميل
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => setFormData({ ...formData, role: 'technician' })}
+                            className={`flex-1 py-3 px-6 rounded-[1.8rem] font-black text-sm transition-all ${
+                                formData.role === 'technician' 
+                                    ? 'bg-blue-600 text-white shadow-lg' 
+                                    : 'text-gray-500 hover:text-gray-900'
+                            }`}
+                        >
+                            أنا فني (مقدم خدمة)
+                        </button>
                     </div>
                     
                     {error && (
@@ -118,20 +184,92 @@ const Register = () => {
                         </div>
                     )}
 
-                    <form className="grid sm:grid-cols-2 gap-8" onSubmit={handleSubmit}>
-                        <div className="space-y-4">
-                            <InputField label="الاسم الكامل" name="name" icon={<User size={20} />} placeholder="أحمد علي" value={formData.name} onChange={handleChange} />
-                            <InputField label="البريد الإلكتروني" name="email" type="email" icon={<Mail size={20} />} placeholder="name@example.com" value={formData.email} onChange={handleChange} />
-                            <InputField label="رقم الهاتف" name="phone" icon={<Phone size={20} />} placeholder="01xxxxxxxxx" value={formData.phone} onChange={handleChange} />
+                    <form onSubmit={handleSubmit}>
+                        <div className="grid sm:grid-cols-2 gap-6">
+                            <div className="space-y-4">
+                                <InputField label="الاسم الكامل" name="name" icon={<User size={20} />} placeholder="أحمد علي" value={formData.name} onChange={handleChange} />
+                                <InputField label="البريد الإلكتروني" name="email" type="email" icon={<Mail size={20} />} placeholder="name@example.com" value={formData.email} onChange={handleChange} />
+                                <InputField label="رقم الهاتف" name="phone" icon={<Phone size={20} />} placeholder="01xxxxxxxxx" value={formData.phone} onChange={handleChange} />
+                            </div>
+
+                            <div className="space-y-4">
+                                <InputField label="كلمة المرور" name="password" type="password" icon={<Lock size={20} />} placeholder="••••••••" value={formData.password} onChange={handleChange} />
+                                <InputField label="تأكيد كلمة المرور" name="password_confirmation" type="password" icon={<Lock size={20} />} placeholder="••••••••" value={formData.password_confirmation} onChange={handleChange} />
+                                <InputField label="العنوان" name="address" icon={<MapPin size={20} />} placeholder="القاهرة، المعادي" value={formData.address} onChange={handleChange} />
+                            </div>
                         </div>
 
-                        <div className="space-y-4">
-                            <InputField label="كلمة المرور" name="password" type="password" icon={<Lock size={20} />} placeholder="••••••••" value={formData.password} onChange={handleChange} />
-                            <InputField label="تأكيد كلمة المرور" name="password_confirmation" type="password" icon={<Lock size={20} />} placeholder="••••••••" value={formData.password_confirmation} onChange={handleChange} />
-                            <InputField label="العنوان" name="address" icon={<MapPin size={20} />} placeholder="القاهرة، المعادي" value={formData.address} onChange={handleChange} />
-                        </div>
+                        {/* Technician Extra Fields */}
+                        <AnimatePresence>
+                            {formData.role === 'technician' && (
+                                <motion.div 
+                                    initial={{ opacity: 0, height: 0 }}
+                                    animate={{ opacity: 1, height: 'auto' }}
+                                    exit={{ opacity: 0, height: 0 }}
+                                    className="overflow-hidden"
+                                >
+                                    <div className="pt-10 mb-6 border-t border-gray-100 mt-10">
+                                        <h3 className="text-xl font-black text-gray-900 mb-2">بيانات العمل الاحترافية</h3>
+                                        <p className="text-gray-500 text-sm font-medium">ساعدنا العميل يوصلك بسهولة</p>
+                                    </div>
+                                    
+                                    <div className="grid sm:grid-cols-2 gap-6">
+                                        <div>
+                                            <label className="text-xs font-black text-gray-500 block mb-3 uppercase tracking-widest mr-2">نوع الخدمة (القسم)</label>
+                                            <div className="relative group">
+                                                <span className="absolute inset-y-0 right-0 pr-5 flex items-center text-gray-400 group-focus-within:text-blue-600 transition-colors pointer-events-none">
+                                                    <Briefcase size={20} />
+                                                </span>
+                                                <select
+                                                    name="category_id"
+                                                    required={formData.role === 'technician'}
+                                                    className="block w-full pr-14 pl-6 py-5 border-2 border-gray-100 rounded-[2rem] text-gray-900 focus:outline-none focus:border-blue-600 transition-all font-bold text-lg bg-white shadow-sm appearance-none"
+                                                    value={formData.category_id}
+                                                    onChange={handleChange}
+                                                >
+                                                    <option value="">اختر القسم...</option>
+                                                    {categories.map((cat) => (
+                                                        <option key={cat.id} value={cat.id}>{cat.name}</option>
+                                                    ))}
+                                                </select>
+                                            </div>
+                                        </div>
 
-                        <div className="sm:col-span-2 pt-6">
+                                        <InputField label="المدينة" name="city" icon={<MapPin size={20} />} placeholder="القاهرة" value={formData.city} onChange={handleChange} required={formData.role === 'technician'} />
+                                        
+                                        <InputField label="سعر الساعة (ج.م)" name="hourly_rate" type="number" icon={<Clock size={20} />} placeholder="150" value={formData.hourly_rate} onChange={handleChange} required={formData.role === 'technician'} />
+                                        
+                                        <InputField label="سنوات الخبرة" name="experience_years" type="number" icon={<Briefcase size={20} />} placeholder="5" value={formData.experience_years} onChange={handleChange} required={formData.role === 'technician'} />
+                                        
+                                        <div className="sm:col-span-2">
+                                            <InputField label="نبذة عن خبرتك" name="bio" icon={<Quote size={20} />} placeholder="تكلم باختصار عن شغلك وخبرتك للعملاء..." value={formData.bio} onChange={handleChange} />
+                                        </div>
+
+                                        <div className="sm:col-span-2">
+                                            <label className="text-xs font-black text-gray-500 block mb-4 uppercase tracking-widest mr-2">أيام العمل المتاحة</label>
+                                            <div className="flex flex-wrap gap-3">
+                                                {days.map((day) => (
+                                                    <button
+                                                        key={day.value}
+                                                        type="button"
+                                                        onClick={() => handleCheckboxChange(day.value)}
+                                                        className={`px-5 py-3 rounded-full text-sm font-black transition-all border-2 ${
+                                                            formData.availability.includes(day.value)
+                                                                ? 'bg-blue-600 border-blue-600 text-white shadow-md'
+                                                                : 'bg-white border-gray-100 text-gray-500 hover:border-blue-200'
+                                                        }`}
+                                                    >
+                                                        {day.label}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        <div className="pt-10">
                             <button
                                 type="submit"
                                 disabled={loading}
@@ -154,17 +292,17 @@ const Register = () => {
     );
 };
 
-const InputField = ({ label, name, type = "text", icon, placeholder, value, onChange }) => (
+const InputField = ({ label, name, type = "text", icon, placeholder, value, onChange, required = true }) => (
     <div>
         <label className="text-xs font-black text-gray-500 block mb-3 uppercase tracking-widest mr-2">{label}</label>
         <div className="relative group">
-            <span className="absolute inset-y-0 right-0 pr-5 flex items-center text-gray-400 group-focus-within:text-blue-600 transition-colors">
+            <span className="absolute inset-y-0 right-0 pr-5 flex items-center text-gray-400 group-focus-within:text-blue-600 transition-colors pointer-events-none">
                 {icon}
             </span>
             <input
                 name={name}
                 type={type}
-                required
+                required={required}
                 className="block w-full pr-14 pl-6 py-5 border-2 border-gray-100 rounded-[2rem] text-gray-900 placeholder-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold text-lg bg-white shadow-sm"
                 placeholder={placeholder}
                 value={value}
