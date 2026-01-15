@@ -18,6 +18,8 @@ const Home = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [categories, setCategories] = useState([]);
 
+    const [topTechnicians, setTopTechnicians] = useState([]);
+
     useEffect(() => {
         setLoading(true);
         // Fetch Services
@@ -34,7 +36,16 @@ const Home = () => {
                     setCategories(res.data.categories);
                 }
             })
-            .catch(err => console.error('Error fetching categories:', err))
+            .catch(err => console.error('Error fetching categories:', err));
+
+        // Fetch Top Technicians for logged in users
+        axios.get('/api/techs', { baseURL: '/' })
+            .then(res => {
+                if (res.data.status === 200) {
+                    setTopTechnicians(res.data.technicians.slice(0, 6));
+                }
+            })
+            .catch(err => console.error('Error fetching technicians:', err))
             .finally(() => setLoading(false));
     }, []);
 
@@ -72,89 +83,121 @@ const Home = () => {
 
     return (
         <div className="bg-slate-50 overflow-x-hidden" dir="rtl">
-            {/* Hero Section - Premium Design */}
-            <section className="relative min-h-[90vh] flex items-center pt-20 pb-16 bg-white overflow-hidden">
-                <div className="absolute top-0 right-0 w-1/2 h-full bg-blue-50/50 skew-x-[-12deg] translate-x-1/4 -z-10" />
-                
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
-                    <div className="grid lg:grid-cols-2 gap-16 items-center">
-                        <motion.div 
-                            initial={{ opacity: 0, x: 50 }}
-                            animate={{ opacity: 1, x: 0 }}
-                            transition={{ duration: 0.8 }}
-                            className="space-y-8 text-right"
-                        >
-                            <div className="inline-flex items-center space-x-2 rtl:space-x-reverse bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-bold animate-pulse">
-                                <Zap size={16} />
-                                <span>ثقة أكثر من 10,000+ عميل في مصر</span>
-                            </div>
-                            
-                            <h1 className="text-6xl lg:text-7xl font-extrabold text-gray-900 leading-[1.1]">
-                                منزلك يستحق <br />
-                                <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">العناية الأفضل</span>
-                            </h1>
-                            
-                            <p className="text-xl text-gray-600 max-w-lg leading-relaxed font-medium">
-                                نجمع لك أمهر الفنيين والخبراء في مكان واحد. جودة مضمونة، أسعار شفافة، وحجز في ثوانٍ.
-                            </p>
-
-                            {/* Advanced Search Bar */}
-                            <div className="relative max-w-xl">
-                                <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
-                                <input 
-                                    type="text"
-                                    placeholder="ما الخدمة التي تحتاجها اليوم؟"
-                                    className="w-full pr-12 pl-4 py-5 rounded-2xl border-2 border-gray-100 focus:border-blue-600 outline-none shadow-sm text-lg font-medium transition-all"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                                <button className="absolute left-2 top-2 bottom-2 bg-blue-600 text-white px-8 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg active:scale-95">
-                                    بحث
-                                </button>
-                            </div>
-
-                            <div className="flex items-center space-x-6 rtl:space-x-reverse pt-4">
-                                <div className="flex -space-x-2 rtl:space-x-reverse">
-                                    {[1, 2, 3, 4].map(i => (
-                                        <img key={i} className="w-10 h-10 rounded-full border-4 border-white" src={`https://i.pravatar.cc/100?img=${i+10}`} alt="user" />
-                                    ))}
+            {/* Hero Section - Only for Guest Users */}
+            {!user ? (
+                <section className="relative min-h-[90vh] flex items-center pt-20 pb-16 bg-white overflow-hidden">
+                    <div className="absolute top-0 right-0 w-1/2 h-full bg-blue-50/50 skew-x-[-12deg] translate-x-1/4 -z-10" />
+                    
+                    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+                        <div className="grid lg:grid-cols-2 gap-16 items-center">
+                            <motion.div 
+                                initial={{ opacity: 0, x: 50 }}
+                                animate={{ opacity: 1, x: 0 }}
+                                transition={{ duration: 0.8 }}
+                                className="space-y-8 text-right"
+                            >
+                                <div className="inline-flex items-center space-x-2 rtl:space-x-reverse bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-bold animate-pulse">
+                                    <Zap size={16} />
+                                    <span>ثقة أكثر من 10,000+ عميل في مصر</span>
                                 </div>
-                                <div className="text-sm font-bold text-gray-500">
-                                    <span className="text-gray-900 ml-1">4.9/5</span>
-                                    تقييم العملاء الراضين
-                                </div>
-                            </div>
-                        </motion.div>
+                                
+                                <h1 className="text-6xl lg:text-7xl font-extrabold text-gray-900 leading-[1.1]">
+                                    منزلك يستحق <br />
+                                    <span className="bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">العناية الأفضل</span>
+                                </h1>
+                                
+                                <p className="text-xl text-gray-600 max-w-lg leading-relaxed font-medium">
+                                    نجمع لك أمهر الفنيين والخبراء في مكان واحد. جودة مضمونة، أسعار شفافة، وحجز في ثوانٍ.
+                                </p>
 
-                        <motion.div 
-                            initial={{ opacity: 0, scale: 0.8 }}
-                            animate={{ opacity: 1, scale: 1 }}
-                            transition={{ duration: 1 }}
-                            className="relative"
-                        >
-                            <div className="absolute -inset-10 bg-gradient-to-tr from-blue-600/20 to-indigo-600/20 rounded-full blur-3xl -z-10" />
-                            <div className="relative rounded-[2.5rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(37,99,235,0.3)] transform rotate-2">
-                                <img 
-                                    src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop" 
-                                    alt="Professional Craftsman" 
-                                    className="w-full object-cover aspect-[4/5]"
-                                />
-                                <div className="absolute bottom-6 right-6 left-6 bg-white/90 backdrop-blur-md p-6 rounded-3xl shadow-2xl border border-white/50">
-                                    <div className="flex justify-between items-center">
-                                        <div className="flex items-center space-x-3 rtl:space-x-reverse">
-                                            <div className="w-12 h-12 rounded-2xl bg-blue-600 flex items-center justify-center text-white"><CheckCircle /></div>
-                                            <div>
-                                                <div className="font-bold text-gray-900 uppercase tracking-wider">تم التحقق</div>
-                                                <div className="text-xs text-gray-500 font-bold">كل الفنيين خضعوا لاختبارات دقيقة</div>
-                                            </div>
+                                {/* Advanced Search Bar */}
+                                <div className="relative max-w-xl">
+                                    <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                    <input 
+                                        type="text"
+                                        placeholder="ما الخدمة التي تحتاجها اليوم؟"
+                                        className="w-full pr-12 pl-4 py-5 rounded-2xl border-2 border-gray-100 focus:border-blue-600 outline-none shadow-sm text-lg font-medium transition-all"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
+                                    <button className="absolute left-2 top-2 bottom-2 bg-blue-600 text-white px-8 rounded-xl font-bold hover:bg-blue-700 transition-all shadow-lg active:scale-95">
+                                        بحث
+                                    </button>
+                                </div>
+                            </motion.div>
+
+                            <motion.div 
+                                initial={{ opacity: 0, scale: 0.8 }}
+                                animate={{ opacity: 1, scale: 1 }}
+                                transition={{ duration: 1 }}
+                                className="relative"
+                            >
+                                <div className="absolute -inset-10 bg-gradient-to-tr from-blue-600/20 to-indigo-600/20 rounded-full blur-3xl -z-10" />
+                                <div className="relative rounded-[2.5rem] overflow-hidden shadow-[0_50px_100px_-20px_rgba(37,99,235,0.3)] transform rotate-2">
+                                    <img 
+                                        src="https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop" 
+                                        alt="Professional Craftsman" 
+                                        className="w-full object-cover aspect-[4/5]"
+                                    />
+                                </div>
+                            </motion.div>
+                        </div>
+                    </div>
+                </section>
+            ) : (
+                <section className="pt-32 pb-16 bg-white min-h-[60vh]">
+                    <div className="max-w-7xl mx-auto px-4">
+                        <div className="flex flex-col md:flex-row justify-between items-end mb-12 space-y-4 md:space-y-0 text-right">
+                            <div>
+                                <h1 className="text-4xl font-black text-gray-900 mb-2">مرحباً بك مجدداً، {user.name} 👋</h1>
+                                <p className="text-gray-500 text-xl font-medium">إليك أفضل المحترفين المتاحين لخدمتك الآن</p>
+                            </div>
+                            <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                                <span className="bg-green-100 text-green-700 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">نشط الآن</span>
+                            </div>
+                        </div>
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                            {loading ? (
+                                [...Array(3)].map((_, i) => <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-[2.5rem]"></div>)
+                            ) : topTechnicians.map((tech, idx) => (
+                                <motion.div 
+                                    key={tech.id}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: idx * 0.1 }}
+                                    className="bg-gray-50/50 p-6 rounded-[2.5rem] border border-gray-100 hover:bg-white hover:shadow-2xl transition-all duration-300 group"
+                                >
+                                    <div className="flex items-center space-x-4 rtl:space-x-reverse mb-6">
+                                        <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-2xl uppercase shadow-lg group-hover:rotate-6 transition-transform overflow-hidden">
+                                            {tech.user?.image ? (
+                                                <img src={tech.user.image} alt={tech.user.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                tech.user?.name?.charAt(0) || 'T'
+                                            )}
+                                        </div>
+                                        <div>
+                                            <h3 className="font-black text-gray-900 text-lg">{tech.user?.name || 'فني محترف'}</h3>
+                                            <div className="text-blue-600 text-xs font-bold uppercase tracking-tighter">{tech.category?.name || 'خدمات عامة'}</div>
+                                        </div>
+                                        <div className="mr-auto flex items-center text-yellow-500 font-black">
+                                            <Star size={16} fill="currentColor" className="ml-1" />
+                                            {tech.rating}
                                         </div>
                                     </div>
-                                </div>
-                            </div>
-                        </motion.div>
+                                    <p className="text-gray-500 text-sm font-medium mb-6 line-clamp-2">{tech.bio}</p>
+                                    <div className="flex items-center justify-between">
+                                        <div className="text-gray-900 font-extrabold">{tech.hourly_rate} ج.م <span className="text-[10px] text-gray-400 font-bold">/ساعة</span></div>
+                                        <Link to={`/booking?tech_id=${tech.id}`} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-blue-600 transition-all active:scale-95">
+                                            احجز الآن
+                                        </Link>
+                                    </div>
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
-                </div>
-            </section>
+                </section>
+            )}
 
             {/* Categories Explorer */}
             <section className="py-24 bg-white">

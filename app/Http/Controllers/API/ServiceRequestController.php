@@ -10,18 +10,21 @@ use Illuminate\Support\Facades\Validator;
 class ServiceRequestController extends Controller
 {
     
-         public function index()
+    public function index(Request $request)
     {
+        $query = ServiceRequest::with(['user', 'technician.user', 'service']);
         
-        $requests = ServiceRequest::with(['user', 'technician', 'service'])->paginate(10);
+        if ($request->has('user_id')) {
+            $query->where('user_id', $request->user_id);
+        }
+
+        $requests = $query->paginate(10);
         $data = [
             'status' => 'success',
-            'data' => $requests,
+            'serviceRequests' => $requests,
             'message' => 'Service requests retrieved successfully'
         ];
         return response()->json($data);
-
-
     }
     public function show($id)
     {
@@ -65,7 +68,12 @@ class ServiceRequestController extends Controller
         'user_id'       => 'required|exists:users,id',
         'technician_id' => 'nullable|exists:technicians,id',
         'service_id'    => 'required|exists:services,id',
-        'status'        => 'required|string|in:pending,in_progress,completed',
+        'status'        => 'required|string|in:pending,accepted,completed',
+        'requested_date' => 'required|date',
+        'requested_time' => 'required',
+        'address'       => 'required|string',
+        'phone'         => 'required|string',
+        'notes'         => 'nullable|string',
     ]);
 
     if ($validator->fails()) {

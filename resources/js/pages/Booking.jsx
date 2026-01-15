@@ -18,6 +18,24 @@ const Booking = () => {
     const [submitting, setSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
     const [error, setError] = useState('');
+    const [formData, setFormData] = useState({
+        requested_date: new Date().toISOString().split('T')[0],
+        requested_time: '',
+        address: user?.address || '',
+        phone: user?.phone || '',
+        notes: ''
+    });
+
+    // Update formData when user loads
+    useEffect(() => {
+        if (user) {
+            setFormData(prev => ({
+                ...prev,
+                address: user.address || prev.address,
+                phone: user.phone || prev.phone
+            }));
+        }
+    }, [user]);
 
     useEffect(() => {
         if (serviceId) {
@@ -77,11 +95,12 @@ const Booking = () => {
                 technician_id: techId || technician?.id,
                 user_id: user.id,
                 status: 'pending'
-            }, { baseURL: '/' });
+            });
             setSuccess(true);
             setTimeout(() => navigate('/dashboard'), 3000);
         } catch (err) {
-            setError('حدث خطأ أثناء إرسال طلب الحجز. يرجى المحاولة مرة أخرى.');
+            console.error('Booking Error:', err.response?.data || err.message);
+            setError(err.response?.data?.message || 'حدث خطأ أثناء إرسال طلب الحجز. يرجى التأكد من ملء جميع البيانات ورن أمر الميجريشن.');
         } finally {
             setSubmitting(false);
         }
@@ -177,6 +196,31 @@ const Booking = () => {
                                             onChange={(e) => setFormData({...formData, requested_time: e.target.value})}
                                         />
                                     </div>
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6">
+                                <div className="col-span-2 sm:col-span-1">
+                                    <label className="text-sm font-bold text-gray-700 block mb-2 mr-1">رقم الهاتف للتواصل</label>
+                                    <input
+                                        type="tel"
+                                        required
+                                        className="w-full px-4 py-3.5 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-blue-600 transition-all font-medium"
+                                        placeholder="مثال: 01012345678"
+                                        value={formData.phone}
+                                        onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                                    />
+                                </div>
+                                <div className="col-span-2 sm:col-span-1">
+                                    <label className="text-sm font-bold text-gray-700 block mb-2 mr-1">عنوان الخدمة بالتفصيل</label>
+                                    <input
+                                        type="text"
+                                        required
+                                        className="w-full px-4 py-3.5 border-2 border-gray-100 rounded-2xl focus:outline-none focus:border-blue-600 transition-all font-medium"
+                                        placeholder="المنطقة، الشارع، رقم الشقة"
+                                        value={formData.address}
+                                        onChange={(e) => setFormData({...formData, address: e.target.value})}
+                                    />
                                 </div>
                             </div>
 

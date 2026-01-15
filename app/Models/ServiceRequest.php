@@ -15,7 +15,11 @@ class ServiceRequest extends Model
         'technician_id',
         'service_id',
         'status',
-       
+        'requested_date',
+        'requested_time',
+        'address',
+        'phone',
+        'notes',
     ];
 
     // علاقة مع User
