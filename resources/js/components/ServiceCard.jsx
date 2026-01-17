@@ -2,8 +2,11 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { MapPin, Star, Bookmark, Clock, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useAuth } from '../context/AuthContext';
 
 const ServiceCard = ({ service }) => {
+    const { user } = useAuth();
+    
     return (
         <motion.div 
             whileHover={{ y: -8 }}
@@ -57,12 +60,18 @@ const ServiceCard = ({ service }) => {
                 </div>
 
                 <div className="mt-auto flex items-center justify-between pt-6 border-t border-gray-50">
-                    <Link
-                        to={`/booking?service_id=${service.id}`}
-                        className="bg-gray-900 text-white px-8 py-3 rounded-2xl font-black hover:bg-blue-600 transition-all text-sm shadow-xl shadow-gray-200"
-                    >
-                        احجز الآن
-                    </Link>
+                    {user?.role === 'technician' ? (
+                        <div className="text-blue-600 text-xs font-bold bg-blue-50 px-3 py-1 rounded-lg">
+                            متاحة لعملائك
+                        </div>
+                    ) : (
+                        <Link
+                            to={`/booking?service_id=${service.id}`}
+                            className="bg-gray-900 text-white px-8 py-3 rounded-2xl font-black hover:bg-blue-600 transition-all text-sm shadow-xl shadow-gray-200"
+                        >
+                            احجز الآن
+                        </Link>
+                    )}
                     <div className="flex items-center">
                         <div className="flex text-yellow-500 ml-2">
                              {[...Array(1)].map((_, i) => <Star key={i} size={18} fill="currentColor" />)}
@@ -74,5 +83,7 @@ const ServiceCard = ({ service }) => {
         </motion.div>
     );
 };
+
+export default ServiceCard;
 
 export default ServiceCard;

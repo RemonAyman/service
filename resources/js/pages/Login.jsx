@@ -21,7 +21,7 @@ const Login = () => {
         
         try {
             await login({ email, password });
-            navigate('/');
+            navigate('/dashboard');
         } catch (err) {
             setError(err.response?.data?.message || 'فشل تسجيل الدخول. يرجى التحقق من بياناتك.');
         } finally {

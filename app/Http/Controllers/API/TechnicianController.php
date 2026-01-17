@@ -11,7 +11,7 @@ class TechnicianController extends Controller
 {
     public function index()
     {
-      $technicians = Technician::with(['user', 'category','serviceRequests','reviews'])->get();
+      $technicians = Technician::with(['user', 'category','serviceRequests','reviews'])->latest()->get();
         $data = [
 
             "msg"   => "Return all Data",

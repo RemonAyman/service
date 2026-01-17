@@ -98,7 +98,7 @@ const Home = () => {
                             >
                                 <div className="inline-flex items-center space-x-2 rtl:space-x-reverse bg-blue-100 text-blue-700 px-4 py-2 rounded-full text-sm font-bold animate-pulse">
                                     <Zap size={16} />
-                                    <span>ثقة أكثر من 10,000+ عميل في مصر</span>
+                                    <span>ثقة واحترافية في كل خدمة منزلية</span>
                                 </div>
                                 
                                 <h1 className="text-6xl lg:text-7xl font-extrabold text-gray-900 leading-[1.1]">
@@ -149,52 +149,67 @@ const Home = () => {
                     <div className="max-w-7xl mx-auto px-4">
                         <div className="flex flex-col md:flex-row justify-between items-end mb-12 space-y-4 md:space-y-0 text-right">
                             <div>
-                                <h1 className="text-4xl font-black text-gray-900 mb-2">مرحباً بك مجدداً، {user.name} 👋</h1>
-                                <p className="text-gray-500 text-xl font-medium">إليك أفضل المحترفين المتاحين لخدمتك الآن</p>
+                                <h1 className="text-4xl font-black text-gray-900 mb-2">
+                                    {user.role === 'technician' ? `مرحباً بك يا بطل، ${user.name} 🛠️` : `مرحباً بك مجدداً، ${user.name} 👋`}
+                                </h1>
+                                <p className="text-gray-500 text-xl font-medium">
+                                    {user.role === 'technician' 
+                                        ? 'تابع طلباتك ونشاطك من لوحة التحكم' 
+                                        : 'إليك أفضل المحترفين المتاحين لخدمتك الآن'}
+                                </p>
                             </div>
-                            <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                                <span className="bg-green-100 text-green-700 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">نشط الآن</span>
-                            </div>
+                            {user.role === 'technician' ? (
+                                <Link to="/dashboard" className="bg-blue-600 text-white px-8 py-4 rounded-2xl font-black hover:bg-blue-700 transition-all shadow-xl active:scale-95 flex items-center space-x-2 rtl:space-x-reverse">
+                                    <span>انتقل للوحة التحكم</span>
+                                    <ArrowRight size={20} />
+                                </Link>
+                            ) : (
+                                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                                    <span className="bg-green-100 text-green-700 px-4 py-2 rounded-full text-xs font-bold uppercase tracking-wider">نشط الآن</span>
+                                </div>
+                            )}
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {loading ? (
-                                [...Array(3)].map((_, i) => <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-[2.5rem]"></div>)
-                            ) : topTechnicians.map((tech, idx) => (
-                                <motion.div 
-                                    key={tech.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ delay: idx * 0.1 }}
-                                    className="bg-gray-50/50 p-6 rounded-[2.5rem] border border-gray-100 hover:bg-white hover:shadow-2xl transition-all duration-300 group"
-                                >
-                                    <div className="flex items-center space-x-4 rtl:space-x-reverse mb-6">
-                                        <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-2xl uppercase shadow-lg group-hover:rotate-6 transition-transform overflow-hidden">
-                                            {tech.user?.image ? (
-                                                <img src={tech.user.image} alt={tech.user.name} className="w-full h-full object-cover" />
-                                            ) : (
-                                                tech.user?.name?.charAt(0) || 'T'
-                                            )}
+                        {user.role !== 'technician' && (
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                                {loading ? (
+                                    [...Array(3)].map((_, i) => <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-[2.5rem]"></div>)
+                                ) : topTechnicians.map((tech, idx) => (
+                                    <motion.div 
+                                        key={tech.id}
+                                        initial={{ opacity: 0, y: 20 }}
+                                        animate={{ opacity: 1, y: 0 }}
+                                        transition={{ delay: idx * 0.1 }}
+                                        className="bg-gray-50/50 p-6 rounded-[2.5rem] border border-gray-100 hover:bg-white hover:shadow-2xl transition-all duration-300 group"
+                                    >
+                                        <div className="flex items-center space-x-4 rtl:space-x-reverse mb-6">
+                                            <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-2xl uppercase shadow-lg group-hover:rotate-6 transition-transform overflow-hidden">
+                                                {tech.user?.image ? (
+                                                    <img src={tech.user.image} alt={tech.user.name} className="w-full h-full object-cover" />
+                                                ) : (
+                                                    tech.user?.name?.charAt(0) || 'T'
+                                                )}
+                                            </div>
+                                            <div>
+                                                <h3 className="font-black text-gray-900 text-lg">{tech.user?.name || 'فني محترف'}</h3>
+                                                <div className="text-blue-600 text-xs font-bold uppercase tracking-tighter">{tech.category?.name || 'خدمات عامة'}</div>
+                                            </div>
+                                            <div className="mr-auto flex items-center text-yellow-500 font-black">
+                                                <Star size={16} fill="currentColor" className="ml-1" />
+                                                {tech.rating}
+                                            </div>
                                         </div>
-                                        <div>
-                                            <h3 className="font-black text-gray-900 text-lg">{tech.user?.name || 'فني محترف'}</h3>
-                                            <div className="text-blue-600 text-xs font-bold uppercase tracking-tighter">{tech.category?.name || 'خدمات عامة'}</div>
+                                        <p className="text-gray-500 text-sm font-medium mb-6 line-clamp-2">{tech.bio}</p>
+                                        <div className="flex items-center justify-between">
+                                            <div className="text-gray-900 font-extrabold">{tech.hourly_rate} ج.م <span className="text-[10px] text-gray-400 font-bold">/ساعة</span></div>
+                                            <Link to={`/booking?tech_id=${tech.id}`} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-blue-600 transition-all active:scale-95">
+                                                احجز الآن
+                                            </Link>
                                         </div>
-                                        <div className="mr-auto flex items-center text-yellow-500 font-black">
-                                            <Star size={16} fill="currentColor" className="ml-1" />
-                                            {tech.rating}
-                                        </div>
-                                    </div>
-                                    <p className="text-gray-500 text-sm font-medium mb-6 line-clamp-2">{tech.bio}</p>
-                                    <div className="flex items-center justify-between">
-                                        <div className="text-gray-900 font-extrabold">{tech.hourly_rate} ج.م <span className="text-[10px] text-gray-400 font-bold">/ساعة</span></div>
-                                        <Link to={`/booking?tech_id=${tech.id}`} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-blue-600 transition-all active:scale-95">
-                                            احجز الآن
-                                        </Link>
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+                        )}
                     </div>
                 </section>
             )}
@@ -304,12 +319,12 @@ const Home = () => {
                 
                 <div className="max-w-5xl mx-auto px-4 relative z-10 grid md:grid-cols-3 gap-12 text-center">
                     <div>
-                        <div className="text-5xl font-black mb-2">50k+</div>
-                        <div className="text-blue-100 font-bold">عملية صيانة ناجحة</div>
+                        <div className="text-5xl font-black mb-2">100%</div>
+                        <div className="text-blue-100 font-bold">خدمات موثوقة</div>
                     </div>
                     <div>
-                        <div className="text-5xl font-black mb-2">12k+</div>
-                        <div className="text-blue-100 font-bold">فني محترف مسجل</div>
+                        <div className="text-5xl font-black mb-2">متنوعة</div>
+                        <div className="text-blue-100 font-bold">تخصصات مهنية</div>
                     </div>
                     <div>
                         <div className="text-5xl font-black mb-2">4.9</div>

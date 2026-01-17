@@ -17,6 +17,10 @@ class ServiceRequestController extends Controller
         if ($request->has('user_id')) {
             $query->where('user_id', $request->user_id);
         }
+        
+        if ($request->has('technician_id')) {
+            $query->where('technician_id', $request->technician_id);
+        }
 
         $requests = $query->paginate(10);
         $data = [
@@ -106,10 +110,10 @@ class ServiceRequestController extends Controller
 
         $validator = Validator::make($request->all(), [
             'id'            => 'nullable|integer|unique:service_requests,id,' . $requestModel->id,
-            'user_id'       => 'required|exists:users,id',
-            'technician_id' => 'nullable|exists:technicians,id',
-            'service_id'    => 'required|exists:services,id',
-            'status'        => 'required|string|in:pending,in_progress,completed',
+            'user_id'       => 'sometimes|exists:users,id',
+            'technician_id' => 'sometimes|exists:technicians,id',
+            'service_id'    => 'sometimes|exists:services,id',
+            'status'        => 'required|string|in:pending,accepted,rejected,completed,cancelled',
         ]);
 
         if ($validator->fails()) {

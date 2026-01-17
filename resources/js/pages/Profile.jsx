@@ -4,8 +4,9 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 import { motion } from 'framer-motion';
 import { 
-    User, Mail, Phone, MapPin, Lock, 
-    Loader2, Camera, ShieldCheck, Check 
+    User as UserIcon, Mail, Phone, MapPin, Lock, 
+    Loader2, Camera, ShieldCheck, Check,
+    Briefcase, DollarSign, Quote
 } from 'lucide-react';
 
 const Profile = () => {
@@ -18,6 +19,11 @@ const Profile = () => {
         address: '',
         password: '',
         password_confirmation: '',
+        // Technician fields
+        bio: '',
+        hourly_rate: '',
+        city: '',
+        experience_years: ''
     });
 
     useEffect(() => {
@@ -28,6 +34,10 @@ const Profile = () => {
                 email: user.email || '',
                 phone: user.phone || '',
                 address: user.address || '',
+                bio: user.technician?.bio || '',
+                hourly_rate: user.technician?.hourly_rate || '',
+                city: user.technician?.city || '',
+                experience_years: user.technician?.experience_years || '',
             });
         }
     }, [user]);
@@ -40,7 +50,13 @@ const Profile = () => {
         e.preventDefault();
         setLoading(true);
         try {
+            // Update User Profile
             await axios.post('/profile/update', formData);
+            
+            // If technician, also update technician profile via a separate call or unified one
+            // Assuming /profile/update handles both if role is technician in the backend
+            // Let's check UserController.php
+            
             await checkUser();
             toast.success('تم تحديث بيانات ملفك الشخصي بنجاح');
             setFormData({ ...formData, password: '', password_confirmation: '' });
@@ -70,13 +86,15 @@ const Profile = () => {
                                     {user.name.charAt(0)}
                                 </div>
                             </div>
-                            <button className="absolute bottom-0 left-0 bg-gray-900 text-white p-2.5 rounded-2xl shadow-xl hover:bg-blue-600 transition-all border-4 border-white">
-                                <Camera size={18} />
-                            </button>
                         </div>
-                        <div className="pb-4">
-                            <h1 className="text-3xl font-black text-white drop-shadow-md">{user.name}</h1>
-                            <p className="text-blue-100 font-bold opacity-80 mt-1">{user.email}</p>
+                        <div className="pb-4 text-white">
+                            <h1 className="text-3xl font-black drop-shadow-md">{user.name}</h1>
+                            <div className="flex items-center space-x-2 rtl:space-x-reverse opacity-80 font-bold">
+                                <span className="bg-white/20 px-3 py-1 rounded-lg text-xs uppercase tracking-wider">
+                                    {user.role === 'technician' ? 'فني محترف' : 'عميل'}
+                                </span>
+                                <span>{user.email}</span>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -87,16 +105,48 @@ const Profile = () => {
                         <section>
                             <div className="flex items-center space-x-3 rtl:space-x-reverse mb-8">
                                 <div className="w-1.5 h-6 bg-blue-600 rounded-full" />
-                                <h2 className="text-xl font-black text-gray-900">المعلومات الأساسية</h2>
+                                <h2 className="text-xl font-black text-gray-900">المعلومات الشخصية</h2>
                             </div>
                             
                             <div className="grid md:grid-cols-2 gap-8">
-                                <ProfileInput label="الاسم الكامل" name="name" icon={<User size={18} />} value={formData.name} onChange={handleChange} />
-                                <ProfileInput label="البريد الإلكتروني" name="email" type="email" icon={<Mail size={18} />} value={formData.email} onChange={handleChange} />
+                                <ProfileInput label="الاسم الكامل" name="name" icon={<UserIcon size={18} />} value={formData.name} onChange={handleChange} />
+                                <ProfileInput label="البريد الإلكتروني" name="email" type="email" icon={<Mail size={18} />} value={formData.email} onChange={handleChange} disabled />
                                 <ProfileInput label="رقم الهاتف" name="phone" icon={<Phone size={18} />} value={formData.phone} onChange={handleChange} />
                                 <ProfileInput label="العنوان" name="address" icon={<MapPin size={18} />} value={formData.address} onChange={handleChange} />
                             </div>
                         </section>
+
+                        {user.role === 'technician' && (
+                            <>
+                                <div className="h-px bg-gray-100" />
+                                <section>
+                                    <div className="flex items-center space-x-3 rtl:space-x-reverse mb-8">
+                                        <div className="w-1.5 h-6 bg-green-600 rounded-full" />
+                                        <h2 className="text-xl font-black text-gray-900">بيانات العمل</h2>
+                                    </div>
+                                    <div className="grid md:grid-cols-2 gap-8">
+                                        <ProfileInput label="المدينة" name="city" icon={<MapPin size={18} />} value={formData.city} onChange={handleChange} />
+                                        <ProfileInput label="سعر الساعة" name="hourly_rate" icon={<DollarSign size={18} />} value={formData.hourly_rate} onChange={handleChange} />
+                                        <div className="md:col-span-2">
+                                            <label className="text-xs font-black text-gray-500 uppercase tracking-widest mr-1 mb-3 block">النبذة الشخصية (Bio)</label>
+                                            <div className="relative group">
+                                                <span className="absolute top-4 right-5 text-gray-400 group-focus-within:text-blue-600 transition-colors">
+                                                    <Quote size={18} />
+                                                </span>
+                                                <textarea
+                                                    name="bio"
+                                                    rows="4"
+                                                    className="block w-full pr-14 pl-6 py-4 border-2 border-gray-100 rounded-2xl text-gray-900 placeholder-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold bg-white"
+                                                    value={formData.bio}
+                                                    onChange={handleChange}
+                                                    placeholder="أخبر العملاء عن خبراتك..."
+                                                ></textarea>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+                            </>
+                        )}
 
                         <div className="h-px bg-gray-100" />
 
@@ -140,7 +190,7 @@ const Profile = () => {
     );
 };
 
-const ProfileInput = ({ label, name, type = "text", icon, value, onChange, placeholder }) => (
+const ProfileInput = ({ label, name, type = "text", icon, value, onChange, placeholder, disabled = false }) => (
     <div className="space-y-3">
         <label className="text-xs font-black text-gray-500 uppercase tracking-widest mr-1">{label}</label>
         <div className="relative group">
@@ -151,7 +201,8 @@ const ProfileInput = ({ label, name, type = "text", icon, value, onChange, place
                 name={name}
                 type={type}
                 placeholder={placeholder}
-                className="block w-full pr-14 pl-6 py-4 border-2 border-gray-100 rounded-2xl text-gray-900 placeholder-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold bg-white"
+                disabled={disabled}
+                className={`block w-full pr-14 pl-6 py-4 border-2 border-gray-100 rounded-2xl text-gray-900 placeholder-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold ${disabled ? 'bg-gray-50' : 'bg-white'}`}
                 value={value}
                 onChange={onChange}
             />

@@ -174,6 +174,10 @@ public function store(Request $request)
             'phone' => 'nullable|string',
             'address' => 'nullable|string',
             'password' => 'nullable|min:6|confirmed',
+            // Technician info
+            'city' => 'nullable|string',
+            'hourly_rate' => 'nullable|numeric',
+            'bio' => 'nullable|string',
         ]);
 
         $data = [
@@ -188,6 +192,15 @@ public function store(Request $request)
         }
 
         $user->update($data);
+
+        // Update Technician Info
+        if ($user->role === 'technician') {
+            $user->technician()->update([
+                'city' => $request->city,
+                'hourly_rate' => $request->hourly_rate,
+                'bio' => $request->bio,
+            ]);
+        }
 
         return response()->json([
             'msg' => 'تم تحديث البيانات بنجاح',
