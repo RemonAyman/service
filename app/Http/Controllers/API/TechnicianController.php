@@ -9,11 +9,18 @@ use Illuminate\Support\Facades\Validator;
 
 class TechnicianController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-      $technicians = Technician::with(['user', 'category','serviceRequests','reviews'])->latest()->get();
+        $query = Technician::with(['user', 'category','serviceRequests','reviews']);
+        
+        // Filter by category_id if provided
+        if ($request->has('category_id')) {
+            $query->where('category_id', $request->category_id);
+        }
+        
+        $technicians = $query->latest()->get();
+        
         $data = [
-
             "msg"   => "Return all Data",
             "status"   => 200,
             "technicians"   => $technicians,
