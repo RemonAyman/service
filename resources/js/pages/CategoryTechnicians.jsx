@@ -7,11 +7,11 @@ import {
     ArrowRight, Loader2, AlertCircle, Calendar,
     User, ShieldCheck, Zap
 } from 'lucide-react';
-import Navbar from '../components/Navbar';
-import Footer from '../components/Footer';
+import { useAuth } from '../context/AuthContext';
 
 const CategoryTechnicians = () => {
     const { categoryId } = useParams();
+    const { user } = useAuth();
     const [technicians, setTechnicians] = useState([]);
     const [category, setCategory] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -55,7 +55,7 @@ const CategoryTechnicians = () => {
     }
 
     return (
-            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+            <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12" dir="rtl">
                 {/* Header Section */}
                 <div className="mb-12 text-right">
                     <Link to="/" className="inline-flex items-center text-blue-600 font-bold hover:underline mb-6 group">
@@ -68,7 +68,9 @@ const CategoryTechnicians = () => {
                                 فنيين قسم {category?.name || 'الخدمات'}
                             </h1>
                             <p className="text-gray-500 text-lg font-medium">
-                                اختر من بين أمهر المتخصصين المتاحين حالياً
+                                {user?.role === 'technician' 
+                                    ? 'استكشف الزملاء المحترفين في مجالك' 
+                                    : 'اختر من بين أمهر المتخصصين المتاحين حالياً'}
                             </p>
                         </div>
                         <div className="hidden md:block bg-white p-4 rounded-2xl shadow-sm border border-gray-100">
@@ -88,9 +90,15 @@ const CategoryTechnicians = () => {
                 {/* Technicians Grid */}
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                     <AnimatePresence>
-                        {technicians.length > 0 ? (
-                            technicians.map((tech, idx) => (
-                                <TechnicianCard key={tech.id} tech={tech} idx={idx} />
+                        {technicians.filter(t => {
+                            const isSeeded = t.user?.email?.endsWith('@services.com');
+                            return user ? !isSeeded : isSeeded;
+                        }).length > 0 ? (
+                            technicians.filter(t => {
+                                const isSeeded = t.user?.email?.endsWith('@services.com');
+                                return user ? !isSeeded : isSeeded;
+                            }).map((tech, idx) => (
+                                <TechnicianCard key={tech.id} tech={tech} idx={idx} currentUser={user} />
                             ))
                         ) : (
                             <div className="col-span-full py-24 text-center bg-white rounded-[3rem] border-2 border-dashed border-gray-200">
@@ -109,7 +117,7 @@ const CategoryTechnicians = () => {
     );
 };
 
-const TechnicianCard = ({ tech, idx }) => {
+const TechnicianCard = ({ tech, idx, currentUser }) => {
     return (
         <motion.div 
             initial={{ opacity: 0, y: 20 }}
@@ -117,7 +125,7 @@ const TechnicianCard = ({ tech, idx }) => {
             transition={{ delay: idx * 0.1 }}
             className="bg-white rounded-[2.5rem] overflow-hidden shadow-sm hover:shadow-2xl transition-all duration-500 border border-gray-100 group flex flex-col h-full"
         >
-            <div className="p-8 pb-4">
+            <div className="p-8 pb-4 text-right">
                 <div className="flex items-start justify-between mb-6">
                     <div className="relative">
                         <div className="w-20 h-20 rounded-2xl bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center text-blue-600 font-black text-3xl shadow-inner uppercase">
@@ -171,13 +179,19 @@ const TechnicianCard = ({ tech, idx }) => {
             </div>
 
             <div className="p-4 mt-auto">
-                <Link 
-                    to={`/booking?tech_id=${tech.id}`} 
-                    className="w-full flex items-center justify-center py-4 px-6 bg-slate-900 text-white rounded-[1.5rem] font-bold text-lg hover:bg-blue-600 transition-all group-hover:shadow-xl active:scale-95"
-                >
-                    <Calendar size={20} className="ml-2" />
-                    احجز الآن
-                </Link>
+                {currentUser?.role === 'technician' ? (
+                    <div className="w-full py-4 text-center bg-blue-50 text-blue-700 font-bold rounded-[1.5rem]">
+                        زميل محترف
+                    </div>
+                ) : (
+                    <Link 
+                        to={`/booking?tech_id=${tech.id}`} 
+                        className="w-full flex items-center justify-center py-4 px-6 bg-slate-900 text-white rounded-[1.5rem] font-bold text-lg hover:bg-blue-600 transition-all group-hover:shadow-xl active:scale-95"
+                    >
+                        <Calendar size={20} className="ml-2" />
+                        احجز الآن
+                    </Link>
+                )}
             </div>
         </motion.div>
     );

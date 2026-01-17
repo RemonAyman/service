@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { User, Mail, Lock, Phone, MapPin, Loader2, AlertCircle, ArrowRight, CheckCircle2, Briefcase, Clock, Calendar, Quote } from 'lucide-react';
+import { User, Mail, Lock, Phone, MapPin, Loader2, AlertCircle, ArrowRight, CheckCircle2, Briefcase, Clock, Calendar, Quote, Eye, EyeOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const Register = () => {
@@ -24,6 +24,7 @@ const Register = () => {
     const [categories, setCategories] = useState([]);
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false); // Added showPassword
     
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -65,7 +66,16 @@ const Register = () => {
             await login({ email: formData.email, password: formData.password });
             navigate('/');
         } catch (err) {
-            setError(err.response?.data?.message || 'فشل إنشاء الحساب. يرجى التأكد من البيانات المدخلة.');
+            console.error('Registration error:', err.response?.data);
+            
+            // Handle validation errors
+            if (err.response?.data?.errors) {
+                const errors = err.response.data.errors;
+                const errorMessages = Object.values(errors).flat();
+                setError(errorMessages.join(' • '));
+            } else {
+                setError(err.response?.data?.message || 'فشل إنشاء الحساب. يرجى التأكد من البيانات المدخلة.');
+            }
         } finally {
             setLoading(false);
         }
@@ -193,8 +203,30 @@ const Register = () => {
                             </div>
 
                             <div className="space-y-4">
-                                <InputField label="كلمة المرور" name="password" type="password" icon={<Lock size={20} />} placeholder="••••••••" value={formData.password} onChange={handleChange} />
-                                <InputField label="تأكيد كلمة المرور" name="password_confirmation" type="password" icon={<Lock size={20} />} placeholder="••••••••" value={formData.password_confirmation} onChange={handleChange} />
+                                <InputField 
+                                    label="كلمة المرور" 
+                                    name="password" 
+                                    type={showPassword ? "text" : "password"} 
+                                    icon={<Lock size={20} />} 
+                                    placeholder="••••••••" 
+                                    value={formData.password} 
+                                    onChange={handleChange} 
+                                    hasToggle={true}
+                                    showPassword={showPassword}
+                                    onToggle={() => setShowPassword(!showPassword)}
+                                />
+                                <InputField 
+                                    label="تأكيد كلمة المرور" 
+                                    name="password_confirmation" 
+                                    type={showPassword ? "text" : "password"} 
+                                    icon={<Lock size={20} />} 
+                                    placeholder="••••••••" 
+                                    value={formData.password_confirmation} 
+                                    onChange={handleChange} 
+                                    hasToggle={true}
+                                    showPassword={showPassword}
+                                    onToggle={() => setShowPassword(!showPassword)}
+                                />
                                 <InputField label="العنوان" name="address" icon={<MapPin size={20} />} placeholder="القاهرة، المعادي" value={formData.address} onChange={handleChange} />
                             </div>
                         </div>
@@ -292,7 +324,7 @@ const Register = () => {
     );
 };
 
-const InputField = ({ label, name, type = "text", icon, placeholder, value, onChange, required = true }) => (
+const InputField = ({ label, name, type = "text", icon, placeholder, value, onChange, required = true, hasToggle = false, showPassword = false, onToggle }) => (
     <div>
         <label className="text-xs font-black text-gray-500 block mb-3 uppercase tracking-widest mr-2">{label}</label>
         <div className="relative group">
@@ -303,11 +335,20 @@ const InputField = ({ label, name, type = "text", icon, placeholder, value, onCh
                 name={name}
                 type={type}
                 required={required}
-                className="block w-full pr-14 pl-6 py-5 border-2 border-gray-100 rounded-[2rem] text-gray-900 placeholder-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold text-lg bg-white shadow-sm"
+                className={`block w-full pr-14 ${hasToggle ? 'pl-14' : 'pl-6'} py-5 border-2 border-gray-100 rounded-[2rem] text-gray-900 placeholder-gray-300 focus:outline-none focus:border-blue-600 transition-all font-bold text-lg bg-white shadow-sm`}
                 placeholder={placeholder}
                 value={value}
                 onChange={onChange}
             />
+            {hasToggle && (
+                <button
+                    type="button"
+                    onClick={onToggle}
+                    className="absolute inset-y-0 left-0 pl-5 flex items-center text-gray-400 hover:text-blue-600 transition-colors"
+                >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+            )}
         </div>
     </div>
 );

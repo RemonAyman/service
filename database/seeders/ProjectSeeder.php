@@ -14,12 +14,24 @@ class ProjectSeeder extends Seeder
     public function run(): void
     {
         // 1. Create Admin User
-        User::create([
-            'name' => 'Admin User',
-            'email' => 'admin@services.com',
-            'password' => Hash::make('password'),
-            'role' => 'admin',
-        ]);
+        User::updateOrCreate(
+            ['email' => 'admin@gmail.com'],
+            [
+                'name' => 'Official Admin',
+                'password' => Hash::make('Admin@123'),
+                'role' => 'admin',
+            ]
+        );
+
+        // Original sample admin
+        User::updateOrCreate(
+            ['email' => 'admin@services.com'],
+            [
+                'name' => 'Admin User',
+                'password' => Hash::make('password'),
+                'role' => 'admin',
+            ]
+        );
 
         // 2. Create Categories
         $categories = [
@@ -38,29 +50,34 @@ class ProjectSeeder extends Seeder
         ];
 
         foreach ($categories as $index => $cat) {
-            $createdCat = Category::create($cat);
+            $createdCat = Category::firstOrCreate(['name' => $cat['name']], $cat);
 
             // Create 2 sample technicians for each category
             for ($i = 1; $i <= 2; $i++) {
-                $techUser = User::create([
-                    'name' => 'فني ' . $cat['name'] . ' ' . $i,
-                    'email' => 'tech' . $index . '_' . $i . '@services.com',
-                    'password' => Hash::make('password'),
-                    'role' => 'technician',
-                    'phone' => '0101234567' . $index . $i,
-                    'address' => 'القاهرة، مصر'
-                ]);
+                $email = 'tech' . $index . '_' . $i . '@services.com';
+                $techUser = User::firstOrCreate(
+                    ['email' => $email],
+                    [
+                        'name' => 'فني ' . $cat['name'] . ' ' . $i,
+                        'password' => Hash::make('password'),
+                        'role' => 'technician',
+                        'phone' => '0101234567' . $index . $i,
+                        'address' => 'القاهرة، مصر'
+                    ]
+                );
 
-                Technician::create([
-                    'user_id' => $techUser->id,
-                    'category_id' => $createdCat->id,
-                    'experience_years' => rand(3, 15),
-                    'rating' => rand(4, 5),
-                    'is_available' => true,
-                    'hourly_rate' => rand(150, 400),
-                    'city' => 'القاهرة',
-                    'bio' => 'أنا فني محترف في قسم ' . $cat['name'] . ' بخبرة كبيرة في كل ما يخص هذا المجال. أقدم خدماتي بدقة وسرعة.'
-                ]);
+                Technician::updateOrCreate(
+                    ['user_id' => $techUser->id],
+                    [
+                        'category_id' => $createdCat->id,
+                        'experience_years' => rand(3, 15),
+                        'rating' => rand(4, 5),
+                        'is_available' => true,
+                        'hourly_rate' => rand(150, 400),
+                        'city' => 'القاهرة',
+                        'bio' => 'أنا فني محترف في قسم ' . $cat['name'] . ' بخبرة كبيرة في كل ما يخص هذا المجال. أقدم خدماتي بدقة وسرعة.'
+                    ]
+                );
             }
 
             // 3. Create sample services for each category
@@ -71,14 +88,15 @@ class ProjectSeeder extends Seeder
                 'https://images.unsplash.com/photo-1558618666-fcd25c85cd6b?q=80&w=1974&auto=format&fit=crop'
             ];
 
-            Service::create([
-                'name' => 'خدمة ' . $cat['name'] . ' متكاملة',
-                'description' => 'نقدم لك أفضل خدمات ' . $cat['name'] . ' بأعلى جودة وضمان شامل على جميع الأعمال المنفذة.',
-                'price' => rand(200, 800),
-                'estimated_time' => rand(1, 4) . ' ساعات',
-                'category_id' => $createdCat->id,
-                'image' => $images[rand(0, 3)]
-            ]);
+            Service::firstOrCreate(
+                ['name' => 'خدمة ' . $cat['name'] . ' متكاملة', 'category_id' => $createdCat->id],
+                [
+                    'description' => 'نقدم لك أفضل خدمات ' . $cat['name'] . ' بأعلى جودة وضمان شامل على جميع الأعمال المنفذة.',
+                    'price' => rand(200, 800),
+                    'estimated_time' => rand(1, 4) . ' ساعات',
+                    'image' => $images[rand(0, 3)]
+                ]
+            );
         }
     }
 }

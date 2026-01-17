@@ -34,7 +34,7 @@ class RegisteredUserController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
-            'phone' => ['required', 'string', 'max:20'], // Phone is required now
+            'phone' => ['required', 'string', 'max:20', 'unique:users,phone'], // Phone is required and MUST be unique
             'address' => ['nullable', 'string'],
             'role' => ['required', 'string', 'in:user,technician'],
             
@@ -72,6 +72,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(RouteServiceProvider::HOME);
+        return redirect('/');
     }
 }

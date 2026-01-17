@@ -32,11 +32,15 @@ const Navbar = () => {
         }
     };
 
-    const navLinks = [
-        { name: 'الرئيسية', path: '/' },
-        { name: 'الخدمات', path: '/services' },
-        { name: 'من نحن', path: '#about' },
-    ];
+    const navLinks = user?.role === 'admin' 
+        ? [
+            { name: 'لوحة الإدارة', path: '/admin' },
+          ]
+        : [
+            { name: 'الرئيسية', path: '/' },
+            { name: 'الخدمات', path: '/services' },
+            { name: 'من نحن', path: '#about' },
+          ];
 
     return (
         <nav className={`fixed top-0 left-0 right-0 z-[100] transition-all duration-500 ${scrolled ? 'py-4 bg-white/80 backdrop-blur-xl shadow-xl' : 'py-6 bg-white'}`}>
@@ -100,10 +104,12 @@ const Navbar = () => {
                                                 <div className="text-xs text-gray-500 mt-1">{user.email}</div>
                                             </div>
                                             
-                                            <Link to="/dashboard" onClick={() => setShowUserMenu(false)} className="flex items-center space-x-3 rtl:space-x-reverse p-3 hover:bg-slate-50 rounded-xl transition-colors font-bold text-sm text-gray-700">
-                                                <LayoutDashboard size={18} className="text-blue-500" />
-                                                <span>لوحة التحكم</span>
-                                            </Link>
+                                            {user.role !== 'admin' && (
+                                                <Link to="/dashboard" onClick={() => setShowUserMenu(false)} className="flex items-center space-x-3 rtl:space-x-reverse p-3 hover:bg-slate-50 rounded-xl transition-colors font-bold text-sm text-gray-700">
+                                                    <LayoutDashboard size={18} className="text-blue-500" />
+                                                    <span>لوحة التحكم</span>
+                                                </Link>
+                                            )}
 
                                             <Link to="/profile" onClick={() => setShowUserMenu(false)} className="flex items-center space-x-3 rtl:space-x-reverse p-3 hover:bg-slate-50 rounded-xl transition-colors font-bold text-sm text-gray-700">
                                                 <User size={18} className="text-green-500" />
@@ -182,7 +188,13 @@ const Navbar = () => {
                                     <Link to="/register" className="py-4 text-center font-black bg-blue-600 text-white rounded-2xl" onClick={() => setIsOpen(false)}>سجل الآن</Link>
                                 </div>
                             ) : (
-                                <Link to="/dashboard" className="block py-4 text-center font-black bg-gray-900 text-white rounded-2xl" onClick={() => setIsOpen(false)}>لوحة التحكم</Link>
+                                <Link 
+                                    to={user.role === 'admin' ? '/admin' : '/dashboard'} 
+                                    className="block py-4 text-center font-black bg-gray-900 text-white rounded-2xl" 
+                                    onClick={() => setIsOpen(false)}
+                                >
+                                    {user.role === 'admin' ? 'إدارة المنصة' : 'لوحة التحكم'}
+                                </Link>
                             )}
                         </div>
                     </motion.div>

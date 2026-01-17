@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { useAuth } from '../context/AuthContext';
-import { Mail, Lock, Loader2, AlertCircle, ArrowLeft, ArrowRight } from 'lucide-react';
+import { Mail, Lock, Loader2, AlertCircle, ArrowLeft, ArrowRight, Eye, EyeOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const Login = () => {
@@ -10,6 +10,7 @@ const Login = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [loading, setLoading] = useState(false);
+    const [showPassword, setShowPassword] = useState(false); // Added showPassword
     
     const { login } = useAuth();
     const navigate = useNavigate();
@@ -20,8 +21,12 @@ const Login = () => {
         setError('');
         
         try {
-            await login({ email, password });
-            navigate('/dashboard');
+            const response = await login({ email, password });
+            if (response.data.user?.role === 'admin') {
+                navigate('/admin');
+            } else {
+                navigate('/');
+            }
         } catch (err) {
             setError(err.response?.data?.message || 'فشل تسجيل الدخول. يرجى التحقق من بياناتك.');
         } finally {
@@ -108,17 +113,24 @@ const Login = () => {
                                     <Link to="#" className="text-xs font-black text-blue-600 hover:underline">نسيت كلمة المرور؟</Link>
                                 </div>
                                 <div className="relative group">
-                                    <span className="absolute inset-y-0 right-0 pr-5 flex items-center text-gray-400 group-focus-within:text-blue-600 transition-colors">
+                                    <span className="absolute inset-y-0 right-0 pr-5 flex items-center text-gray-400 group-focus-within:text-blue-600 transition-colors pointer-events-none">
                                         <Lock className="h-5 w-5" />
                                     </span>
                                     <input
-                                        type="password"
+                                        type={showPassword ? "text" : "password"}
                                         required
-                                        className="block w-full pr-14 pl-6 py-5 border-2 border-gray-100 rounded-[2rem] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 transition-all font-bold text-lg shadow-sm"
+                                        className="block w-full pr-14 pl-14 py-5 border-2 border-gray-100 rounded-[2rem] text-gray-900 placeholder-gray-400 focus:outline-none focus:border-blue-600 transition-all font-bold text-lg shadow-sm"
                                         placeholder="••••••••"
                                         value={password}
                                         onChange={(e) => setPassword(e.target.value)}
                                     />
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowPassword(!showPassword)}
+                                        className="absolute inset-y-0 left-0 pl-5 flex items-center text-gray-400 hover:text-blue-600 transition-colors"
+                                    >
+                                        {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                                    </button>
                                 </div>
                             </div>
                         </div>

@@ -3,7 +3,7 @@ import { useAuth } from '../context/AuthContext';
 import { 
     LayoutGrid, Users, Settings, Plus, Edit, Trash2, 
     PieChart, Loader2, X, Image as ImageIcon, CheckCircle, 
-    TrendingUp, Calendar, DollarSign, ChevronLeft, MoreVertical
+    TrendingUp, Calendar, DollarSign, ChevronLeft, MoreVertical, Bell
 } from 'lucide-react';
 import axios from 'axios';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -142,11 +142,14 @@ const AdminDashboard = () => {
             {/* Main Admin Area */}
             <main className="flex-grow flex flex-col overflow-hidden bg-slate-50/50">
                 <header className="h-24 bg-white border-b border-gray-100 px-12 flex items-center justify-between shrink-0">
-                    <h1 className="text-2xl font-black text-gray-900">
-                         {activeTab === 'stats' ? 'نظرة عامة على النظام' : 
-                          activeTab === 'services' ? 'إدارة الخدمات' : 
-                          activeTab === 'categories' ? 'إدارة التصنيفات' : 'مدير المستخدمين'}
-                    </h1>
+                    <div className="flex flex-col">
+                        <h1 className="text-2xl font-black text-gray-900">
+                             {activeTab === 'stats' ? 'نظرة عامة على النظام' : 
+                              activeTab === 'services' ? 'إدارة الخدمات' : 
+                              activeTab === 'categories' ? 'إدارة التصنيفات' : 'مدير المستخدمين'}
+                        </h1>
+                        <p className="text-blue-600 font-black text-sm uppercase tracking-[0.2em] mt-1">Welcome Sir, {user.name} 👑</p>
+                    </div>
                     
                     <div className="flex items-center space-x-6 rtl:space-x-reverse">
                          {(activeTab === 'services' || activeTab === 'categories') && (
@@ -204,10 +207,27 @@ const AdminDashboard = () => {
                                                     </div>
                                                 </td>
                                                 <td className="px-8 py-6 text-center">
-                                                    <span className="inline-block px-4 py-2 bg-slate-100 rounded-xl text-slate-700 font-black text-sm">
-                                                        {activeTab === 'services' ? `${item.price} ج.م` : 
-                                                         activeTab === 'categories' ? item.description : item.email}
-                                                    </span>
+                                                    {activeTab === 'users' ? (
+                                                        <div className="flex flex-col items-center space-y-2">
+                                                            <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest ${
+                                                                item.role === 'admin' ? 'bg-red-100 text-red-700' :
+                                                                item.role === 'technician' ? 'bg-blue-100 text-blue-700' : 'bg-green-100 text-green-700'
+                                                            }`}>
+                                                                {item.role === 'admin' ? 'مسؤول' : item.role === 'technician' ? 'مقدم خدمة' : 'عميل'}
+                                                            </span>
+                                                            <div className="flex items-center space-x-2 rtl:space-x-reverse text-[10px] font-bold text-gray-400">
+                                                                <span>📦 {item.stats?.total_requests || 0}</span>
+                                                                <span className="text-gray-200">|</span>
+                                                                <span className="text-yellow-600">⌛ {item.stats?.pending || 0}</span>
+                                                                <span className="text-gray-200">|</span>
+                                                                <span className="text-green-600">✅ {item.stats?.completed || 0}</span>
+                                                            </div>
+                                                        </div>
+                                                    ) : (
+                                                        <span className="inline-block px-4 py-2 bg-slate-100 rounded-xl text-slate-700 font-black text-sm">
+                                                            {activeTab === 'services' ? `${item.price} ج.م` : item.description}
+                                                        </span>
+                                                    )}
                                                 </td>
                                                 <td className="px-8 py-6">
                                                     <div className="flex justify-end space-x-3 rtl:space-x-reverse">

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { 
     ArrowRight, Star, Shield, Clock, Search, Zap, 
     Smile, Trophy, CheckCircle, Smartphone, 
@@ -18,7 +18,15 @@ const Home = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [categories, setCategories] = useState([]);
 
+    const navigate = useNavigate();
     const [topTechnicians, setTopTechnicians] = useState([]);
+    const [myBookings, setMyBookings] = useState([]);
+
+    useEffect(() => {
+        if (user?.role === 'admin') {
+            navigate('/admin');
+        }
+    }, [user, navigate]);
 
     useEffect(() => {
         setLoading(true);
@@ -38,16 +46,61 @@ const Home = () => {
             })
             .catch(err => console.error('Error fetching categories:', err));
 
-        // Fetch Top Technicians for logged in users
-        axios.get('/api/techs', { baseURL: '/' })
-            .then(res => {
-                if (res.data.status === 200) {
-                    setTopTechnicians(res.data.technicians.slice(0, 6));
+        // Role-based data fetching
+        const fetchData = async () => {
+            try {
+                if (user) {
+                    if (user.role === 'technician') {
+                        // Fetch bookings for technician
+                        const res = await axios.get('/api/servicerequests', { 
+                            baseURL: '/',
+                            params: { technician_id: user.technician?.id } 
+                        });
+                        setMyBookings((res.data.data || []).slice(0, 3));
+                    } else {
+                        // Fetch Top Technicians for regular users
+                        const res = await axios.get('/api/techs', { baseURL: '/' });
+                        if (res.data.status === 200) {
+                            setTopTechnicians((res.data.technicians || []).slice(0, 6));
+                        }
+                    }
+                } else {
+                    // Fetch Top Technicians for guest users too
+                    const res = await axios.get('/api/techs', { baseURL: '/' });
+                    if (res.data.status === 200) {
+                        setTopTechnicians((res.data.technicians || []).slice(0, 6));
+                    }
                 }
-            })
-            .catch(err => console.error('Error fetching technicians:', err))
-            .finally(() => setLoading(false));
-    }, []);
+            } catch (err) {
+                console.error('Error fetching role-based data:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [user]);
+
+    // Added helping functions for status in Home.jsx or import them
+    const getStatusLabel = (status) => {
+        switch(status) {
+            case 'pending': return 'قيد الانتظار';
+            case 'accepted': return 'مقبول';
+            case 'rejected': return 'مرفوض';
+            case 'completed': return 'مكتمل';
+            default: return status;
+        }
+    };
+
+    const getStatusColor = (status) => {
+        switch(status) {
+            case 'pending': return 'bg-yellow-100 text-yellow-700';
+            case 'accepted': return 'bg-green-100 text-green-700';
+            case 'rejected': return 'bg-red-100 text-red-700';
+            case 'completed': return 'bg-blue-100 text-blue-700';
+            default: return 'bg-gray-100 text-gray-700';
+        }
+    };
 
     const getCategoryIcon = (name) => {
         switch (name) {
@@ -150,12 +203,14 @@ const Home = () => {
                         <div className="flex flex-col md:flex-row justify-between items-end mb-12 space-y-4 md:space-y-0 text-right">
                             <div>
                                 <h1 className="text-4xl font-black text-gray-900 mb-2">
-                                    {user.role === 'technician' ? `مرحباً بك يا بطل، ${user.name} 🛠️` : `مرحباً بك مجدداً، ${user.name} 👋`}
+                                    {user ? (user.role === 'technician' ? `مرحباً بك يا بطل، ${user.name} 🛠️` : `مرحباً بك مجدداً، ${user.name} 👋`) : 'مرحباً بك في منصة الخدمات'}
                                 </h1>
                                 <p className="text-gray-500 text-xl font-medium">
-                                    {user.role === 'technician' 
-                                        ? 'تابع طلباتك ونشاطك من لوحة التحكم' 
-                                        : 'إليك أفضل المحترفين المتاحين لخدمتك الآن'}
+                                    {user ? (
+                                        user.role === 'technician' 
+                                            ? 'ننتظر منك مجهوداً رائعاً وتقييمات ممتازة من عملائك. استمر في التألق! 🚀' 
+                                            : 'إليك أفضل المحترفين المتاحين لخدمتك الآن'
+                                    ) : 'اكتشف أفضل المحترفين لخدمة منزلك'}
                                 </p>
                             </div>
                             {user.role === 'technician' ? (
@@ -170,11 +225,56 @@ const Home = () => {
                             )}
                         </div>
 
-                        {user.role !== 'technician' && (
+                        {user.role === 'technician' ? (
+                            <div className="space-y-6">
+                                <h2 className="text-2xl font-black text-gray-900 mb-6 flex items-center">
+                                    <span className="w-2 h-8 bg-blue-600 rounded-full ml-3"></span>
+                                    آخر الطلبات الواردة
+                                </h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    {myBookings.length > 0 ? (
+                                        myBookings.map((booking, idx) => (
+                                            <motion.div 
+                                                key={booking.id}
+                                                initial={{ opacity: 0, scale: 0.95 }}
+                                                animate={{ opacity: 1, scale: 1 }}
+                                                transition={{ delay: idx * 0.1 }}
+                                                className="bg-gray-50 p-6 rounded-[2rem] border border-gray-100 relative group"
+                                            >
+                                                <div className={`absolute top-4 left-4 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-tighter shadow-sm ${getStatusColor(booking.status)}`}>
+                                                    {getStatusLabel(booking.status)}
+                                                </div>
+                                                <div className="mb-4">
+                                                    <div className="text-blue-600 font-bold text-sm mb-1">{booking.service?.name}</div>
+                                                    <div className="text-gray-900 font-black text-lg">{booking.user?.name}</div>
+                                                </div>
+                                                <div className="flex items-center text-gray-500 text-xs font-bold mb-4">
+                                                    <Clock size={14} className="ml-1" />
+                                                    {booking.requested_date} @ {booking.requested_time}
+                                                </div>
+                                                <Link to="/dashboard" className="w-full block text-center py-3 bg-white border border-gray-200 rounded-xl text-blue-600 font-bold text-sm hover:bg-blue-600 hover:text-white transition-all shadow-sm">
+                                                    عرض التفاصيل
+                                                </Link>
+                                            </motion.div>
+                                        ))
+                                    ) : (
+                                        <div className="col-span-3 py-12 text-center bg-blue-50/30 rounded-[2rem] border-2 border-dashed border-blue-100">
+                                            <div className="text-4xl mb-3">📭</div>
+                                            <div className="text-gray-500 font-bold">لا يوجد طلبات جديدة حالياً</div>
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+                        ) : (
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 {loading ? (
                                     [...Array(3)].map((_, i) => <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-[2.5rem]"></div>)
-                                ) : topTechnicians.map((tech, idx) => (
+                                ) : topTechnicians.filter(t => {
+                                    // If logged in, only show real users (those NOT using the seeded domain)
+                                    // If not logged in, show seeded users (as marketing data)
+                                    const isSeeded = t.user?.email?.endsWith('@services.com');
+                                    return user ? !isSeeded : isSeeded;
+                                }).map((tech, idx) => (
                                     <motion.div 
                                         key={tech.id}
                                         initial={{ opacity: 0, y: 20 }}

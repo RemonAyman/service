@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
     Calendar, Clock, CheckCircle, XCircle, 
@@ -9,9 +10,16 @@ import axios from 'axios';
 import { toast } from 'react-toastify';
 
 const Dashboard = () => {
+    const navigate = useNavigate();
     const { user, loading: authLoading } = useAuth();
     const [bookings, setBookings] = useState([]);
     const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (user?.role === 'admin') {
+            navigate('/admin');
+        }
+    }, [user, navigate]);
 
     useEffect(() => {
         if (user) {

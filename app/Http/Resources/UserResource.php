@@ -14,11 +14,27 @@ class UserResource extends JsonResource
             'id' => $this->id,
             'name' => $this->name,
             'email' => $this->email,
-            "password" => $this->password,
+            'role' => $this->role,
             "address" => $this->address,
             "phone" => $this->phone,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
+            
+            // Stats for Admin
+            'stats' => [
+                'total_requests' => $this->role === 'technician' 
+                    ? ($this->technician ? $this->technician->serviceRequests()->count() : 0)
+                    : $this->serviceRequests()->count(),
+                'pending' => $this->role === 'technician'
+                    ? ($this->technician ? $this->technician->serviceRequests()->where('status', 'pending')->count() : 0)
+                    : $this->serviceRequests()->where('status', 'pending')->count(),
+                'accepted' => $this->role === 'technician'
+                    ? ($this->technician ? $this->technician->serviceRequests()->where('status', 'accepted')->count() : 0)
+                    : $this->serviceRequests()->where('status', 'accepted')->count(),
+                'completed' => $this->role === 'technician'
+                    ? ($this->technician ? $this->technician->serviceRequests()->where('status', 'completed')->count() : 0)
+                    : $this->serviceRequests()->where('status', 'completed')->count(),
+            ]
         ];
     }
 }

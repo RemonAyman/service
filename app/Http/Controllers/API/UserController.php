@@ -81,7 +81,7 @@ public function store(Request $request)
             'name'  => 'required',
             'email' => 'required|email|unique:users',
             'password' => 'required|min:6',
-            'phone' => 'nullable|string',
+            'phone' => 'nullable|string|unique:users,phone',
             'address' => 'nullable|string',
             
         ]);
@@ -174,10 +174,14 @@ public function store(Request $request)
             'phone' => 'nullable|string',
             'address' => 'nullable|string',
             'password' => 'nullable|min:6|confirmed',
+            'role' => 'nullable|string|in:user,technician',
             // Technician info
             'city' => 'nullable|string',
             'hourly_rate' => 'nullable|numeric',
             'bio' => 'nullable|string',
+            'experience_years' => 'nullable|integer',
+            'availability' => 'nullable|string',
+            'category_id' => 'nullable|exists:categories,id', // Added category_id
         ]);
 
         $data = [
@@ -187,6 +191,10 @@ public function store(Request $request)
             'address' => $request->address,
         ];
 
+        if ($request->filled('role')) {
+            $data['role'] = $request->role;
+        }
+
         if ($request->filled('password')) {
             $data['password'] = Hash::make($request->password);
         }
@@ -194,12 +202,18 @@ public function store(Request $request)
         $user->update($data);
 
         // Update Technician Info
-        if ($user->role === 'technician') {
-            $user->technician()->update([
-                'city' => $request->city,
-                'hourly_rate' => $request->hourly_rate,
-                'bio' => $request->bio,
-            ]);
+        if ($request->role === 'technician' || $user->role === 'technician') {
+            $user->technician()->updateOrCreate(
+                ['user_id' => $user->id],
+                [
+                    'city' => $request->city,
+                    'hourly_rate' => $request->hourly_rate,
+                    'bio' => $request->bio,
+                    'experience_years' => $request->experience_years,
+                    'availability' => $request->availability,
+                    'category_id' => $request->category_id ?? ($user->technician?->category_id ?? 1),
+                ]
+            );
         }
 
         return response()->json([

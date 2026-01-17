@@ -28,7 +28,7 @@ Route::middleware('auth')->group(function () {
 });
 
 
-Auth::routes();
+Auth::routes(['register' => false]);
 
 Route::group(["middleware"=>"CheckAdmin"] ,function(){
 
@@ -112,3 +112,8 @@ Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->name('revi
 ////////////////////////////////////////
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 });
+
+// Catch-all route for React SPA - must be at the end
+Route::get('/{any}', function () {
+    return view('welcome');
+})->where('any', '.*');
