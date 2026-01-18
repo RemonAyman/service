@@ -4,7 +4,7 @@ import { MapPin, Star, Bookmark, Clock, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useAuth } from '../context/AuthContext';
 
-const ServiceCard = ({ service }) => {
+const ServiceCard = ({ service, technicianId }) => {
     const { user } = useAuth();
     
     return (
@@ -66,7 +66,7 @@ const ServiceCard = ({ service }) => {
                         </div>
                     ) : (
                         <Link
-                            to={`/booking?service_id=${service.id}`}
+                            to={`/booking?service_id=${service.id}${technicianId ? `&tech_id=${technicianId}` : ''}`}
                             className="bg-gray-900 text-white px-8 py-3 rounded-2xl font-black hover:bg-blue-600 transition-all text-sm shadow-xl shadow-gray-200"
                         >
                             احجز الآن

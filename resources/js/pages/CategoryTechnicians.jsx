@@ -185,11 +185,11 @@ const TechnicianCard = ({ tech, idx, currentUser }) => {
                     </div>
                 ) : (
                     <Link 
-                        to={`/booking?tech_id=${tech.id}`} 
+                        to={`/technician/${tech.id}`} 
                         className="w-full flex items-center justify-center py-4 px-6 bg-slate-900 text-white rounded-[1.5rem] font-bold text-lg hover:bg-blue-600 transition-all group-hover:shadow-xl active:scale-95"
                     >
-                        <Calendar size={20} className="ml-2" />
-                        احجز الآن
+                        <User size={20} className="ml-2" />
+                        عرض الملف
                     </Link>
                 )}
             </div>

@@ -25,6 +25,7 @@ import Booking from './pages/Booking';
 import AdminDashboard from './pages/AdminDashboard';
 import Profile from './pages/Profile';
 import CategoryTechnicians from './pages/CategoryTechnicians';
+import TechnicianProfile from './pages/TechnicianProfile';
 
 const PageWrapper = ({ children }) => (
     <motion.div
@@ -46,6 +47,7 @@ function AppContent() {
                 <Route path="/" element={<MainLayout />}>
                     <Route index element={<PageWrapper><Home /></PageWrapper>} />
                     <Route path="category/:categoryId/technicians" element={<PageWrapper><CategoryTechnicians /></PageWrapper>} />
+                    <Route path="technician/:id" element={<PageWrapper><TechnicianProfile /></PageWrapper>} />
                     <Route path="services" element={<PageWrapper><Services /></PageWrapper>} />
                     <Route path="login" element={<PageWrapper><Login /></PageWrapper>} />
                     <Route path="register" element={<PageWrapper><Register /></PageWrapper>} />

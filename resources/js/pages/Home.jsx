@@ -275,13 +275,13 @@ const Home = () => {
                                     const isSeeded = t.user?.email?.endsWith('@services.com');
                                     return user ? !isSeeded : isSeeded;
                                 }).map((tech, idx) => (
-                                    <motion.div 
-                                        key={tech.id}
-                                        initial={{ opacity: 0, y: 20 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        transition={{ delay: idx * 0.1 }}
-                                        className="bg-gray-50/50 p-6 rounded-[2.5rem] border border-gray-100 hover:bg-white hover:shadow-2xl transition-all duration-300 group"
-                                    >
+                                    <Link to={`/technician/${tech.id}`} key={tech.id}>
+                                        <motion.div 
+                                            initial={{ opacity: 0, y: 20 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            transition={{ delay: idx * 0.1 }}
+                                            className="bg-gray-50/50 p-6 rounded-[2.5rem] border border-gray-100 hover:bg-white hover:shadow-2xl transition-all duration-300 group cursor-pointer"
+                                        >
                                         <div className="flex items-center space-x-4 rtl:space-x-reverse mb-6">
                                             <div className="w-16 h-16 rounded-2xl bg-blue-600 flex items-center justify-center text-white font-black text-2xl uppercase shadow-lg group-hover:rotate-6 transition-transform overflow-hidden">
                                                 {tech.user?.image ? (
@@ -302,11 +302,12 @@ const Home = () => {
                                         <p className="text-gray-500 text-sm font-medium mb-6 line-clamp-2">{tech.bio}</p>
                                         <div className="flex items-center justify-between">
                                             <div className="text-gray-900 font-extrabold">{tech.hourly_rate} ج.م <span className="text-[10px] text-gray-400 font-bold">/ساعة</span></div>
-                                            <Link to={`/booking?tech_id=${tech.id}`} className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-sm hover:bg-blue-600 transition-all active:scale-95">
-                                                احجز الآن
-                                            </Link>
+                                            <span className="bg-slate-900 text-white px-6 py-3 rounded-xl font-bold text-sm group-hover:bg-blue-600 transition-all inline-block">
+                                                عرض الملف
+                                            </span>
                                         </div>
                                     </motion.div>
+                                    </Link>
                                 ))}
                             </div>
                         )}

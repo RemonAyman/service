@@ -67,8 +67,9 @@ const Booking = () => {
                 const servicesRes = await axios.get(`/api/services`, { baseURL: '/' });
                 const catServices = servicesRes.data.services.data.filter(s => s.category_id === tech.category_id);
                 setServices(catServices);
-                if (catServices.length > 0) {
-                    setService(catServices[0]); // Default to first service
+                if (catServices.length > 0 && serviceId) {
+                    const selectedService = catServices.find(s => s.id === parseInt(serviceId));
+                    if(selectedService) setService(selectedService);
                 }
             }
         } catch (err) {
@@ -91,7 +92,7 @@ const Booking = () => {
         try {
             await axios.post('/servicerequeststore', {
                 ...formData,
-                service_id: serviceId || service?.id,
+                service_id: serviceId || service?.id || null,
                 technician_id: techId || technician?.id,
                 user_id: user.id,
                 status: 'pending'
@@ -145,12 +146,12 @@ const Booking = () => {
                                 <div className="text-gray-400 text-xs font-bold uppercase">{technician.category?.name}</div>
                             </div>
                         )}
-                        <h2 className="text-xl font-bold text-gray-900 mb-2">{service?.name || 'اختر الخدمة'}</h2>
+                        <h2 className="text-xl font-bold text-gray-900 mb-2">{service?.name || (technician ? 'خدمة صيانة عامة' : 'اختر الخدمة')}</h2>
                         <div className="text-2xl font-extrabold text-blue-600 mb-4">{service?.price || technician?.hourly_rate || 0} ج.م</div>
                         <div className="space-y-3 pt-4 border-t border-gray-50">
                             <div className="flex items-center text-sm text-gray-500 font-medium">
                                 <Clock className="h-4 w-4 ml-2 text-blue-500" />
-                                <span>{service ? `مدة الخدمة: ${service.estimated_time}` : `سعر الساعة: ${technician?.hourly_rate} ج.م`}</span>
+                                <span>{service ? `مدة الخدمة: ${service.estimated_time}` : `سعر الساعة: ${technician?.hourly_rate || 0} ج.م`}</span>
                             </div>
                         </div>
                     </div>

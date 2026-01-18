@@ -29,7 +29,7 @@ class TechnicianController extends Controller
     }
     public function show($id)
     {
-        $technicians = Technician::with(['category','serviceRequests','reviews'])->find($id);
+        $technicians = Technician::with(['user', 'category','serviceRequests','reviews'])->find($id);
         if ($technicians) {
             $data = [
 
@@ -83,7 +83,11 @@ class TechnicianController extends Controller
         'category_id' => 'required|exists:categories,id',
         'experience_years' => 'required|integer|min:0',
         'rating' => 'nullable|numeric|min:0|max:5',
-        'is_available' => 'required|boolean', // دلوقتي هيمشي مع أي قيمة صحيحة
+        'is_available' => 'required|boolean',
+        'hourly_rate' => 'nullable|numeric|min:0',
+        'city' => 'nullable|string|max:255',
+        'bio' => 'nullable|string',
+        'availability' => 'nullable',
     ]);
 
     if ($validator->fails()) {
@@ -100,7 +104,11 @@ class TechnicianController extends Controller
         'category_id' => $request->category_id,
         'experience_years' => $request->experience_years,
         'rating' => $request->rating ?? 0,
-        'is_available' => $request->is_available, // ✅ هيتخزن حسب القيمة اللي جات
+        'is_available' => $request->is_available,
+        'hourly_rate' => $request->hourly_rate,
+        'city' => $request->city,
+        'bio' => $request->bio,
+        'availability' => $request->availability,
     ]);
 
     return response()->json([
@@ -133,7 +141,11 @@ public function update(Request $request)
         'category_id' => 'required|exists:categories,id',
         'experience_years' => 'required|integer|min:0',
         'rating' => 'nullable|numeric|min:0|max:5',
-        'is_available' => 'required|boolean', // دلوقتي هيمشي مع أي قيمة صحيحة
+        'is_available' => 'required|boolean',
+        'hourly_rate' => 'nullable|numeric|min:0',
+        'city' => 'nullable|string|max:255',
+        'bio' => 'nullable|string',
+        'availability' => 'nullable',
     ]);
 
     if ($validator->fails()) {
@@ -150,7 +162,11 @@ public function update(Request $request)
         'category_id' => $request->category_id,
         'experience_years' => $request->experience_years,
         'rating' => $request->rating ?? 0,
-        'is_available' => $request->is_available, // ✅ هيتخزن حسب القيمة اللي جات
+        'is_available' => $request->is_available,
+        'hourly_rate' => $request->hourly_rate,
+        'city' => $request->city,
+        'bio' => $request->bio,
+        'availability' => $request->availability,
     ]);
 
     return response()->json([

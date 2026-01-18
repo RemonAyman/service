@@ -71,7 +71,7 @@ class ServiceRequestController extends Controller
         'id'            => 'nullable|integer|unique:service_requests,id',
         'user_id'       => 'required|exists:users,id',
         'technician_id' => 'nullable|exists:technicians,id',
-        'service_id'    => 'required|exists:services,id',
+        'service_id'    => 'nullable|exists:services,id',
         'status'        => 'required|string|in:pending,accepted,completed',
         'requested_date' => 'required|date',
         'requested_time' => 'required',
