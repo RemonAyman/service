@@ -19,7 +19,9 @@ import { AuthProvider } from './context/AuthContext';
 import Home from './pages/Home';
 import Services from './pages/Services';
 import Login from './pages/Login';
-import Register from './pages/Register';
+import RegisterChoice from './pages/RegisterChoice';
+import RegisterClient from './pages/RegisterClient';
+import RegisterTechnician from './pages/RegisterTechnician';
 import Dashboard from './pages/Dashboard';
 import Booking from './pages/Booking';
 import AdminDashboard from './pages/AdminDashboard';
@@ -50,7 +52,12 @@ function AppContent() {
                     <Route path="technician/:id" element={<PageWrapper><TechnicianProfile /></PageWrapper>} />
                     <Route path="services" element={<PageWrapper><Services /></PageWrapper>} />
                     <Route path="login" element={<PageWrapper><Login /></PageWrapper>} />
-                    <Route path="register" element={<PageWrapper><Register /></PageWrapper>} />
+                    
+                    {/* New Separate Registration Routes */}
+                    <Route path="register" element={<PageWrapper><RegisterChoice /></PageWrapper>} />
+                    <Route path="register/client" element={<PageWrapper><RegisterClient /></PageWrapper>} />
+                    <Route path="register/technician" element={<PageWrapper><RegisterTechnician /></PageWrapper>} />
+                    
                     <Route path="dashboard" element={
                         <ProtectedRoute>
                             <PageWrapper><Dashboard /></PageWrapper>
