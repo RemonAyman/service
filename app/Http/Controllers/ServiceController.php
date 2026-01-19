@@ -11,7 +11,18 @@ class ServiceController extends Controller
     // Display all services
     public function index()
     {
-        $services = Service::with('category')->paginate(10);
+        // Get services sorted by latest
+        $services = Service::latest()->with('category')->paginate(10);
+        
+        // If API request (from React), return JSON including the Paginator object
+        // Paginator serializes to { current_page: 1, data: [...], ... }
+        if (request()->wantsJson()) {
+            return response()->json([
+                'status' => 200,
+                'services' => $services, 
+            ]); 
+        }
+
         return view('services.index', compact('services'));
     }
 
@@ -26,7 +37,7 @@ class ServiceController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'id'             => 'nullable|integer|unique:services,id',
+            // 'id' => 'nullable|integer|unique:services,id', // Let DB handle ID auto-increment
             'name'           => 'required|string|max:255',
             'description'    => 'nullable|string',
             'price'          => 'required|numeric|min:0',
@@ -34,7 +45,15 @@ class ServiceController extends Controller
             'category_id'    => 'required|exists:categories,id',
         ]);
 
-        Service::create($validated);
+        $service = Service::create($validated);
+
+        if (request()->wantsJson()) {
+             return response()->json([
+                'status' => 200,
+                'message' => 'Service created successfully',
+                'service' => $service,
+            ]);
+        }
 
         return redirect()->route('services.index')->with('success', 'Service created successfully');
     }
@@ -43,6 +62,14 @@ class ServiceController extends Controller
     public function show($id)
     {
         $service = Service::with('category', 'serviceRequests')->findOrFail($id);
+        
+        if (request()->wantsJson()) {
+             return response()->json([
+                'status' => 200,
+                'service' => $service,
+            ]);
+        }
+        
         return view('services.show', compact('service'));
     }
 
@@ -55,12 +82,17 @@ class ServiceController extends Controller
     }
 
     // Update a service
-    public function update(Request $request, $id)
+    public function update(Request $request, $id = null)
     {
+        // If ID is not passed in route (e.g. from API POST /serviceupdate), get it from request
+        if (!$id) {
+            $id = $request->input('old_id') ?? $request->input('id');
+        }
+        
         $service = Service::findOrFail($id);
 
         $validated = $request->validate([
-            'id'             => 'nullable|integer|unique:services,id,' . $service->id,
+            // 'id' => 'nullable|integer|unique:services,id,' . $service->id,
             'name'           => 'required|string|max:255',
             'description'    => 'nullable|string',
             'price'          => 'required|numeric|min:0',
@@ -70,6 +102,14 @@ class ServiceController extends Controller
 
         $service->update($validated);
 
+        if (request()->wantsJson()) {
+             return response()->json([
+                'status' => 200,
+                'message' => 'Service updated successfully',
+                'service' => $service,
+            ]);
+        }
+
         return redirect()->route('services.index')->with('success', 'Service updated successfully');
     }
 
@@ -78,6 +118,13 @@ class ServiceController extends Controller
     {
         $service = Service::findOrFail($id);
         $service->delete();
+
+        if (request()->wantsJson()) {
+             return response()->json([
+                'status' => 200,
+                'message' => 'Service deleted successfully',
+            ]);
+        }
 
         return redirect()->route('services.index')->with('success', 'Service deleted successfully');
     }

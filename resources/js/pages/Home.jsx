@@ -33,7 +33,9 @@ const Home = () => {
         // Fetch Services
         axios.get('/services')
             .then(res => {
-                setFeaturedServices(res.data.services.data.slice(0, 4));
+                // Check if response has services array directly or inside data
+                const servicesData = res.data.services?.data || res.data.services || [];
+                setFeaturedServices(servicesData.slice(0, 8)); // increased to 8
             })
             .catch(err => console.error('Error fetching services:', err));
 

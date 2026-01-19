@@ -36,13 +36,22 @@ const AdminDashboard = () => {
         try {
             const endpoint = activeTab === 'services' ? '/services' : 
                             activeTab === 'categories' ? '/cats' : '/users';
-            const response = await axios.get(endpoint);
             
-            if (activeTab === 'services') setItems(response.data.services.data);
+            // Explicitly request JSON to trigger wantsJson() in controller
+            const response = await axios.get(endpoint, {
+                headers: { 'Accept': 'application/json' }
+            });
+            
+            if (activeTab === 'services') {
+               // Handle both paginated and non-paginated responses safely
+               const data = response.data.services?.data || response.data.services || [];
+               setItems(data);
+            }
             else if (activeTab === 'categories') setItems(response.data.categories);
             else setItems(response.data.users);
             
         } catch (err) {
+            console.error(err);
             toast.error('فشل تحميل البيانات. تأكد من اتصال الـ SQL.');
         } finally {
             setLoading(false);
@@ -81,7 +90,7 @@ const AdminDashboard = () => {
         if (item) {
             setFormData({ ...item });
         } else {
-            setFormData({ id: Math.floor(Math.random() * 10000) });
+            setFormData({}); // Remove manual ID generation
         }
         setShowModal(true);
     };
@@ -99,7 +108,8 @@ const AdminDashboard = () => {
             await axios.post(endpoint, data);
             toast.success(editingItem ? 'تم التحديث في قاعدة البيانات' : 'تم الإضافة بنجاح');
             setShowModal(false);
-            fetchData();
+            // Small timeout to ensure DB commit is visible
+            setTimeout(() => fetchData(), 200);
         } catch (err) {
             toast.error('فشل حفظ البيانات. راجع مدخلات SQL.');
         }
@@ -286,8 +296,10 @@ const AdminDashboard = () => {
 
                             <form onSubmit={handleFormSubmit} className="space-y-8">
                                 <div className="grid grid-cols-2 gap-6">
-                                    <AdminInput label="الرقم التعريفي (ID)" value={formData.id} onChange={(v) => setFormData({...formData, id: v})} type="number" />
-                                    <AdminInput label="الاسم" value={formData.name} onChange={(v) => setFormData({...formData, name: v})} />
+                                    {/* <AdminInput label="الرقم التعريفي (ID)" value={formData.id} onChange={(v) => setFormData({...formData, id: v})} type="number" /> */}
+                                    <div className="col-span-2">
+                                         <AdminInput label="الاسم" value={formData.name} onChange={(v) => setFormData({...formData, name: v})} />
+                                    </div>
                                 </div>
 
                                 {modalType === 'service' && (

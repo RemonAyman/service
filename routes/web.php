@@ -110,7 +110,18 @@ Route::put('/reviews/{id}', [ReviewController::class, 'update'])->name('reviews.
 // Delete review
 Route::delete('/reviews/{id}', [ReviewController::class, 'destroy'])->name('reviews.destroy');
 ////////////////////////////////////////
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+    // Custom Admin Dashboard Routes (matching React frontend calls)
+    Route::post('/servicestore', [ServiceController::class, 'store']);
+    Route::post('/serviceupdate', [ServiceController::class, 'update']);
+    Route::get('/servicedelete/{id}', [ServiceController::class, 'destroy']); // Note: React uses GET for delete currently
+
+    Route::post('/catstore', [CategoryController::class, 'store']);
+    Route::post('/catupdate', [CategoryController::class, 'update']);
+    Route::get('/catdelete/{id}', [CategoryController::class, 'delete']);
+
+    Route::get('/userdelete/{id}', [UserController::class, 'delete']);
+
+    Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
 });
 
 // Catch-all route for React SPA - must be at the end
