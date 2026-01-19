@@ -22,6 +22,7 @@ import Login from './pages/Login';
 import RegisterChoice from './pages/RegisterChoice';
 import RegisterClient from './pages/RegisterClient';
 import RegisterTechnician from './pages/RegisterTechnician';
+import About from './pages/About'; // Import About
 import Dashboard from './pages/Dashboard';
 import Booking from './pages/Booking';
 import AdminDashboard from './pages/AdminDashboard';
@@ -57,6 +58,7 @@ function AppContent() {
                     <Route path="register" element={<PageWrapper><RegisterChoice /></PageWrapper>} />
                     <Route path="register/client" element={<PageWrapper><RegisterClient /></PageWrapper>} />
                     <Route path="register/technician" element={<PageWrapper><RegisterTechnician /></PageWrapper>} />
+                    <Route path="about" element={<PageWrapper><About /></PageWrapper>} /> {/* Added Route */}
                     
                     <Route path="dashboard" element={
                         <ProtectedRoute>

@@ -39,7 +39,8 @@ const Navbar = () => {
         : [
             { name: 'الرئيسية', path: '/' },
             { name: 'الخدمات', path: '/services' },
-            { name: 'من نحن', path: '#about' },
+            { name: 'من نحن', path: '/about' }, // Changed from #about to /about
+            { name: 'ابحث عن فني', path: '/services' }, // Added new link
           ];
 
     return (

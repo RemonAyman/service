@@ -381,6 +381,86 @@ const Home = () => {
                 </div>
             </section>
 
+            {/* About Us & History Section - NEW */}
+            <section className="py-24 bg-white relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-1/3 h-full bg-blue-50/50 skew-x-12 translate-x-1/2 -z-10" />
+                
+                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                    <div className="grid lg:grid-cols-2 gap-16 items-center">
+                        {/* Text Content */}
+                        <motion.div 
+                            initial={{ opacity: 0, x: 50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="text-right space-y-8"
+                        >
+                            <div>
+                                <h2 className="text-4xl font-black text-gray-900 mb-4">قصتنا وتاريخنا</h2>
+                                <div className="h-1.5 w-24 bg-blue-600 rounded-full mb-8" />
+                                <p className="text-xl text-gray-600 leading-relaxed font-medium mb-6">
+                                    تأسست منصتنا في عام 2020 برؤية طموحة تهدف إلى إحداث ثورة في سوق الخدمات المنزلية في مصر. بدأنا كفريق صغير من 5 أفراد يحملون حلماً بتسهيل حياة الناس، واليوم نفخر بكوننا الخيار الأول لأكثر من 50,000 أسرة.
+                                </p>
+                                <p className="text-lg text-gray-500 leading-relaxed">
+                                    نحن نؤمن بأن الجودة ليست مجرد شعار، بل هي التزام يومي. لذلك، يمر جميع مقدمي الخدمات لدينا بعملية اختيار صارمة تشمل اختبارات فنية وفحص الخلفية الجنائية لضمان أمان منزلك وراحتك. هدفنا ليس مجرد إصلاح عطل، بل بناء علاقة ثقة تدوم لسنوات.
+                                </p>
+                            </div>
+
+                            {/* Stats */}
+                            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 pt-8 border-t border-gray-100">
+                                <div>
+                                    <h4 className="text-3xl font-black text-blue-600 mb-1">+500</h4>
+                                    <p className="text-gray-900 font-bold">فني محترف</p>
+                                </div>
+                                <div>
+                                    <h4 className="text-3xl font-black text-blue-600 mb-1">+50k</h4>
+                                    <p className="text-gray-900 font-bold">عميل سعيد</p>
+                                </div>
+                                <div>
+                                    <h4 className="text-3xl font-black text-blue-600 mb-1">+120k</h4>
+                                    <p className="text-gray-900 font-bold">مهمة ناجحة</p>
+                                </div>
+                            </div>
+
+                           <div className="pt-6">
+                               <Link to="/register" className="inline-flex items-center space-x-2 rtl:space-x-reverse text-blue-700 font-black hover:text-blue-800 transition-colors">
+                                   <span>انضم لقصة نجاحنا</span>
+                                   <ArrowRight size={20} />
+                               </Link>
+                           </div>
+                        </motion.div>
+
+                        {/* Image/Visual */}
+                        <motion.div 
+                            initial={{ opacity: 0, x: -50 }}
+                            whileInView={{ opacity: 1, x: 0 }}
+                            viewport={{ once: true }}
+                            className="relative"
+                        >
+                             <div className="relative rounded-[3rem] overflow-hidden shadow-2xl">
+                                <img 
+                                    src="https://images.unsplash.com/photo-1581578731117-10d52143b1e8?q=80&w=2069&auto=format&fit=crop" 
+                                    alt="Our Team" 
+                                    className="w-full h-full object-cover aspect-square"
+                                />
+                                <div className="absolute bottom-0 right-0 bg-blue-600 text-white p-8 rounded-tl-[3rem]">
+                                    <div className="text-5xl font-black mb-1">5</div>
+                                    <div className="font-bold text-blue-100">سنوات من<br/>الخبرة والتميّز</div>
+                                </div>
+                            </div>
+                            
+                            {/* Floating Element */}
+                            <div className="absolute -top-10 -left-10 bg-white p-6 rounded-[2rem] shadow-xl max-w-[200px] hidden md:block animate-bounce duration-[3000ms]">
+                                <div className="flex items-center space-x-2 rtl:space-x-reverse mb-2">
+                                    <div className="w-3 h-3 bg-green-500 rounded-full" />
+                                    <span className="text-xs font-bold text-gray-500">متاح الآن</span>
+                                </div>
+                                <div className="font-black text-gray-900">فريق دعم فني جاهز لخدمتك 24/7</div>
+                            </div>
+                        </motion.div>
+                    </div>
+                </div>
+            </section>
+
             {/* Featured Services - Grid with animations */}
             <section className="py-24">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
