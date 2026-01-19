@@ -60,15 +60,21 @@ const Home = () => {
                         });
                         setMyBookings((res.data.data || []).slice(0, 3));
                     } else {
-                        // Fetch Top Technicians for regular users
-                        const res = await axios.get('/api/techs', { baseURL: '/' });
+                        // Fetch Top Technicians for regular users (REAL technicians only)
+                        const res = await axios.get('/api/techs', { 
+                            baseURL: '/',
+                            params: { mode: 'real' }
+                        });
                         if (res.data.status === 200) {
                             setTopTechnicians((res.data.technicians || []).slice(0, 6));
                         }
                     }
                 } else {
-                    // Fetch Top Technicians for guest users too
-                    const res = await axios.get('/api/techs', { baseURL: '/' });
+                    // Fetch Top Technicians for guest users (SEEDED/MARKETING only)
+                    const res = await axios.get('/api/techs', { 
+                        baseURL: '/',
+                        params: { mode: 'guest' }
+                    });
                     if (res.data.status === 200) {
                         setTopTechnicians((res.data.technicians || []).slice(0, 6));
                     }
@@ -271,12 +277,7 @@ const Home = () => {
                             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                                 {loading ? (
                                     [...Array(3)].map((_, i) => <div key={i} className="h-64 bg-gray-100 animate-pulse rounded-[2.5rem]"></div>)
-                                ) : topTechnicians.filter(t => {
-                                    // If logged in, only show real users (those NOT using the seeded domain)
-                                    // If not logged in, show seeded users (as marketing data)
-                                    const isSeeded = t.user?.email?.endsWith('@services.com');
-                                    return user ? !isSeeded : isSeeded;
-                                }).map((tech, idx) => (
+                                ) : topTechnicians.map((tech, idx) => (
                                     <Link to={`/technician/${tech.id}`} key={tech.id}>
                                         <motion.div 
                                             initial={{ opacity: 0, y: 20 }}

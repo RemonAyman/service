@@ -17,6 +17,19 @@ class TechnicianController extends Controller
         if ($request->has('category_id')) {
             $query->where('category_id', $request->category_id);
         }
+
+        // Filter by mode (real vs guest/seeded)
+        if ($request->has('mode')) {
+            if ($request->mode === 'real') {
+                $query->whereHas('user', function($q) {
+                    $q->where('email', 'not like', '%@services.com');
+                });
+            } elseif ($request->mode === 'guest') {
+                $query->whereHas('user', function($q) {
+                    $q->where('email', 'like', '%@services.com');
+                });
+            }
+        }
         
         $technicians = $query->latest()->get();
         

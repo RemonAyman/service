@@ -88,8 +88,54 @@ class ServiceRequestController extends Controller
         ], 422);
     }
 
+    // Auto-assign technician if not provided
+    $data = $validator->validated();
+    
+    if (empty($data['technician_id'])) {
+        // We need a service_id to find a relevant technician
+        if (empty($data['service_id'])) {
+             return response()->json([
+                'status' => 'error',
+                'message' => 'Service ID is required when no technician is selected.'
+            ], 422);
+        }
+
+        $service = \App\Models\Service::find($data['service_id']);
+        if (!$service) {
+             return response()->json([
+                'status' => 'error',
+                'message' => 'Selected service not found.'
+            ], 422);
+        }
+
+        // Find technicians in this category
+        $query = \App\Models\Technician::where('category_id', $service->category_id)
+                    ->where('is_available', true); // Only available techs
+
+        // Optional: Prioritize "Real" technicians (not seeded)
+        // We can try to pick a real one first
+        $realTechs = clone $query;
+        $candidate = $realTechs->whereHas('user', function($q) {
+            $q->where('email', 'not like', '%@services.com');
+        })->inRandomOrder()->first();
+
+        // If no real tech found, fall back to any tech (seeded/marketing)
+        if (!$candidate) {
+            $candidate = $query->inRandomOrder()->first();
+        }
+
+        if (!$candidate) {
+            return response()->json([
+                'status' => 'error',
+                'message' => 'عذراً، لا يوجد فنيين متاحين حالياً لهذه الخدمة. يرجى المحاولة في وقت لاحق.'
+            ], 422);
+        }
+
+        $data['technician_id'] = $candidate->id;
+    }
+
     // إنشاء الطلب بعد التحقق من صحة البيانات
-    $serviceRequest = ServiceRequest::create($validator->validated());
+    $serviceRequest = ServiceRequest::create($data);
 
     return response()->json([
         'status' => 'success',
