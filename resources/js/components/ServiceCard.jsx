@@ -21,7 +21,8 @@ const ServiceCard = ({ service, technicianId }) => {
 
             <div className="relative aspect-[16/11] overflow-hidden">
                 <img 
-                    src={service.image || "https://images.unsplash.com/photo-1621905252507-b354bcadc911?q=80&w=2070&auto=format&fit=crop"} 
+                    src={service.image || "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop"} 
+                    onError={(e) => { e.target.onerror = null; e.target.src = "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop"; }}
                     alt={service.name} 
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />

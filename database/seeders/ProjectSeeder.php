@@ -82,10 +82,10 @@ class ProjectSeeder extends Seeder
 
             // 3. Create sample services for each category
             $images = [
-                'https://images.unsplash.com/photo-1581578731548-c64695cc6954?q=80&w=2070&auto=format&fit=crop',
                 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1595844730298-b960ff98fee0?q=80&w=2070&auto=format&fit=crop',
-                'https://images.unsplash.com/photo-1558618666-fcd25c85cd6b?q=80&w=1974&auto=format&fit=crop'
+                'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop',
+                'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?q=80&w=2069&auto=format&fit=crop'
             ];
 
             Service::firstOrCreate(

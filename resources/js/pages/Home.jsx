@@ -441,7 +441,7 @@ const Home = () => {
                         >
                              <div className="relative rounded-[3rem] overflow-hidden shadow-2xl">
                                 <img 
-                                    src="https://images.unsplash.com/photo-1581578731117-10d52143b1e8?q=80&w=2069&auto=format&fit=crop" 
+                                    src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?q=80&w=2070&auto=format&fit=crop" 
                                     alt="Our Team" 
                                     className="w-full h-full object-cover aspect-square"
                                 />
