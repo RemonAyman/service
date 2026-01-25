@@ -21,11 +21,12 @@ const AdminDashboard = () => {
     const [modalType, setModalType] = useState('service');
     const [editingItem, setEditingItem] = useState(null);
     const [formData, setFormData] = useState({});
+    const [stats, setStats] = useState(null);
 
     useEffect(() => {
-        if (activeTab !== 'stats') {
-            fetchData();
-        }
+        // Fetch data for all tabs including stats
+        fetchData();
+        
         if (activeTab === 'services' || activeTab === 'stats') {
             fetchCategories();
         }
@@ -35,7 +36,8 @@ const AdminDashboard = () => {
         setLoading(true);
         try {
             const endpoint = activeTab === 'services' ? '/services' : 
-                            activeTab === 'categories' ? '/cats' : '/users';
+                            activeTab === 'categories' ? '/cats' : 
+                            activeTab === 'users' ? '/users' : '/admin/stats';
             
             // Explicitly request JSON to trigger wantsJson() in controller
             const response = await axios.get(endpoint, {
@@ -48,11 +50,13 @@ const AdminDashboard = () => {
                setItems(data);
             }
             else if (activeTab === 'categories') setItems(response.data.categories);
-            else setItems(response.data.users);
+            else if (activeTab === 'users') setItems(response.data.users);
+            else if (activeTab === 'stats') setStats(response.data);
             
         } catch (err) {
             console.error(err);
-            toast.error('فشل تحميل البيانات. تأكد من اتصال الـ SQL.');
+            const errMsg = err.response?.data?.message || err.message || 'فشل تحميل البيانات.';
+            toast.error(`خطأ: ${errMsg}`);
         } finally {
             setLoading(false);
         }
@@ -186,7 +190,7 @@ const AdminDashboard = () => {
                         transition={{ duration: 0.4 }}
                     >
                         {activeTab === 'stats' ? (
-                            <AdminStatsView />
+                            <AdminStatsView stats={stats} loading={loading} />
                         ) : loading ? (
                             <div className="flex flex-col justify-center items-center h-96 space-y-6">
                                 <Loader2 className="h-16 w-16 text-blue-600 animate-spin" />
@@ -358,42 +362,67 @@ const AdminSidebarItem = ({ icon, label, active, onClick }) => (
     </button>
 );
 
-const AdminStatsView = () => (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-        <StatCard icon={<TrendingUp className="text-blue-600" />} label="إجمالي الخدمات" value="24" trend="+3 هذا الشهر" color="blue" />
-        <StatCard icon={<Users className="text-indigo-600" />} label="المستخدمين النشطين" value="1.2k" trend="+54 عضو" color="indigo" />
-        <StatCard icon={<DollarSign className="text-emerald-600" />} label="إيرادات اليوم" value="4,820" trend="ج.م" color="emerald" />
-        <StatCard icon={<Calendar className="text-amber-600" />} label="حجوزات معلقة" value="9" trend="تحتاج موافقة" color="amber" />
-        
-        <div className="md:col-span-4 bg-white p-12 rounded-[3rem] shadow-sm border border-gray-100">
-            <div className="flex justify-between items-center mb-10">
-                <div>
-                    <h3 className="text-2xl font-black text-gray-900">آخر التحركات في النظام</h3>
-                    <p className="text-gray-400 font-bold mt-1">تحديثات مباشرة من قاعدة بيانات SQL</p>
-                </div>
-                <button className="text-blue-600 font-black hover:underline">مشاهدة السجل الكامل</button>
-            </div>
+const AdminStatsView = ({ stats, loading }) => {
+    if (loading) return (
+        <div className="flex justify-center items-center h-64">
+             <Loader2 className="h-10 w-10 text-blue-600 animate-spin" />
+        </div>
+    );
+
+    if (!stats) return (
+        <div className="flex flex-col justify-center items-center h-64 text-red-500">
+             <div className="bg-red-50 p-4 rounded-full mb-3"><X size={32} /></div>
+             <div className="font-bold text-lg">فشل تحميل الإحصائيات</div>
+             <p className="text-sm opacity-70 mt-1">يرجى المحاولة مرة أخرى أو التحقق من السجلات</p>
+        </div>
+    );
+
+    return (
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <StatCard icon={<LayoutGrid className="text-blue-600" />} label="إجمالي الخدمات" value={stats.total_services} trend="خدمة مسجلة" color="blue" />
+            <StatCard icon={<Users className="text-indigo-600" />} label="المستخدمين النشطين" value={stats.active_users} trend="عضو فعال" color="indigo" />
+            <StatCard icon={<DollarSign className="text-emerald-600" />} label="إيرادات اليوم" value={stats.todays_revenue} trend="ج.م" color="emerald" />
+            <StatCard icon={<Calendar className="text-amber-600" />} label="حجوزات معلقة" value={stats.pending_bookings} trend="تحتاج موافقة" color="amber" />
             
-            <div className="space-y-6">
-                {[1, 2, 3].map(i => (
-                    <div key={i} className="flex items-center justify-between p-6 bg-slate-50/50 rounded-3xl group hover:bg-white border border-transparent hover:border-gray-100 transition-all cursor-pointer">
-                        <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                            <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 shadow-inner group-hover:rotate-6 transition-transform"><Calendar size={24} /></div>
-                            <div>
-                                <div className="font-black text-gray-900">طلب حجز جديد (#4820)</div>
-                                <div className="text-xs text-gray-400 font-bold mt-1">بواسطة: محمد علي • منذ 5 دقائق</div>
-                            </div>
-                        </div>
-                        <div className="flex items-center space-x-4 rtl:space-x-reverse">
-                            <span className="px-5 py-2 bg-amber-100 text-amber-700 rounded-full text-xs font-black ring-4 ring-white">قيد المراجعة</span>
-                            <MoreVertical className="text-gray-300" size={20} />
-                        </div>
+            <div className="md:col-span-4 bg-white p-12 rounded-[3rem] shadow-sm border border-gray-100">
+                <div className="flex justify-between items-center mb-10">
+                    <div>
+                        <h3 className="text-2xl font-black text-gray-900">آخر التحركات في النظام</h3>
+                        <p className="text-gray-400 font-bold mt-1">تحديثات مباشرة من قاعدة بيانات SQL</p>
                     </div>
-                ))}
+                    {/* <button className="text-blue-600 font-black hover:underline">مشاهدة السجل الكامل</button> */}
+                </div>
+                
+                <div className="space-y-6">
+                    {stats.recent_activities && stats.recent_activities.length > 0 ? (
+                        stats.recent_activities.map((activity) => (
+                            <div key={activity.id} className="flex items-center justify-between p-6 bg-slate-50/50 rounded-3xl group hover:bg-white border border-transparent hover:border-gray-100 transition-all cursor-pointer">
+                                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                                    <div className="w-14 h-14 rounded-2xl bg-blue-100 flex items-center justify-center text-blue-600 shadow-inner group-hover:rotate-6 transition-transform"><Calendar size={24} /></div>
+                                    <div>
+                                        <div className="font-black text-gray-900">طلب حجز جديد (#{activity.id})</div>
+                                        <div className="text-xs text-gray-400 font-bold mt-1">بواسطة: {activity.user_name} • {activity.created_at_human}</div>
+                                    </div>
+                                </div>
+                                <div className="flex items-center space-x-4 rtl:space-x-reverse">
+                                    <span className={`px-5 py-2 rounded-full text-xs font-black ring-4 ring-white ${
+                                        activity.status === 'pending' ? 'bg-amber-100 text-amber-700' : 
+                                        activity.status === 'completed' ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-700'
+                                    }`}>
+                                        {activity.status === 'pending' ? 'قيد المراجعة' : activity.status}
+                                    </span>
+                                    {/* <MoreVertical className="text-gray-300" size={20} /> */}
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <div className="text-center text-gray-400 py-10 font-bold">لا توجد تحركات حديثة</div>
+                    )}
+                </div>
             </div>
         </div>
-    </div>
-);
+    );
+};
 
 const StatCard = ({ icon, label, value, trend, color }) => (
     <div className="bg-white p-8 rounded-[2.5rem] shadow-sm border border-gray-100 relative group overflow-hidden">

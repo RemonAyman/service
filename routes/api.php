@@ -53,3 +53,6 @@ Route::get('/reviewone/{id}', [ReviewController::class, 'show']);
 Route::get('/reviewdelete/{id}', [ReviewController::class, 'delete']);
 Route::post('/reviewstore', [ReviewController::class, 'store']);
 Route::post('/reviewupdate', [ReviewController::class, 'update']);
+
+///// Admin Routes API /////
+Route::get('/admin/stats', [\App\Http\Controllers\API\AdminController::class, 'stats']);
